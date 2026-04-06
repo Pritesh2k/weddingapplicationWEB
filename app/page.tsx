@@ -555,7 +555,7 @@ const page = () => {
           role="navigation"
           aria-label="Main navigation"
         >
-          <div className="max-w-7xl mx-auto px-6 lg:px-10 h-16 flex items-center justify-between">
+          <div className="max-w-7xl mx-auto px-6 lg:px-10 h-16 flex items-center justify-between relative">
 
             <button
               onClick={() => scrollTo('hero')}
@@ -572,7 +572,7 @@ const page = () => {
               <span className="font-semibold tracking-tight text-lg" style={{ color: textPrimary }}>Vow</span>
             </button>
 
-            <div className="hidden md:flex items-center gap-8" role="list">
+            <div className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2" role="list">
               {[
                 { label: 'Features', id: 'features' },
                 { label: 'Live Mode', id: 'command-centre' },
