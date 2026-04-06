@@ -78,14 +78,14 @@ const IconCheck = () => (
 const getPasswordStrength = (pw: string): { score: number; label: string; color: string } => {
   if (!pw) return { score: 0, label: '', color: 'transparent' }
   let score = 0
-  if (pw.length >= 8)           score++
-  if (/[A-Z]/.test(pw))         score++
-  if (/[0-9]/.test(pw))         score++
-  if (/[^A-Za-z0-9]/.test(pw))  score++
+  if (pw.length >= 8) score++
+  if (/[A-Z]/.test(pw)) score++
+  if (/[0-9]/.test(pw)) score++
+  if (/[^A-Za-z0-9]/.test(pw)) score++
   const map = [
-    { score: 1, label: 'Weak',   color: '#E05A4A' },
-    { score: 2, label: 'Fair',   color: '#D4AA66' },
-    { score: 3, label: 'Good',   color: '#7ABDB0' },
+    { score: 1, label: 'Weak', color: '#E05A4A' },
+    { score: 2, label: 'Fair', color: '#D4AA66' },
+    { score: 3, label: 'Good', color: '#7ABDB0' },
     { score: 4, label: 'Strong', color: '#5A9E8A' },
   ]
   return map[score - 1] ?? { score: 0, label: '', color: 'transparent' }
@@ -95,17 +95,17 @@ const getPasswordStrength = (pw: string): { score: number; label: string; color:
 const Signup = () => {
   const { darkMode, toggleTheme, T } = useTheme()
 
-  const [fullName, setFullName]               = useState('')
-  const [email, setEmail]                     = useState('')
-  const [password, setPassword]               = useState('')
+  const [fullName, setFullName] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [showPassword, setShowPassword]       = useState(false)
-  const [showConfirm, setShowConfirm]         = useState(false)
-  const [agreedToTerms, setAgreedToTerms]     = useState(false)
-  const [loading, setLoading]                 = useState(false)
-  const [error, setError]                     = useState('')
-  const [fieldFocus, setFieldFocus]           = useState<string | null>(null)
-  const [submitted, setSubmitted]             = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
+  const [agreedToTerms, setAgreedToTerms] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [fieldFocus, setFieldFocus] = useState<string | null>(null)
+  const [submitted, setSubmitted] = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
 
   const strength = getPasswordStrength(password)
@@ -138,9 +138,11 @@ const Signup = () => {
     setSubmitted(true)
   }
 
-  const inputStyle = (field: string) => ({
+  const inputStyle = (field: string): React.CSSProperties => ({
     backgroundColor: T.inputBg,
-    border: `1px solid ${fieldFocus === field ? T.inputFocus : T.inputBorder}`,
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    borderColor: fieldFocus === field ? T.inputFocus : T.inputBorder,
     color: T.textPrimary,
     outline: 'none',
     transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
@@ -204,9 +206,11 @@ const Signup = () => {
         <div className="absolute inset-0" style={{ background: T.heroBg }} />
         <div
           className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] rounded-full blur-3xl"
-          style={{ background: darkMode
-            ? 'radial-gradient(ellipse, rgba(160,120,72,0.10) 0%, transparent 70%)'
-            : 'radial-gradient(ellipse, rgba(139,107,71,0.08) 0%, transparent 70%)' }}
+          style={{
+            background: darkMode
+              ? 'radial-gradient(ellipse, rgba(160,120,72,0.10) 0%, transparent 70%)'
+              : 'radial-gradient(ellipse, rgba(139,107,71,0.08) 0%, transparent 70%)'
+          }}
         />
       </div>
 
@@ -485,8 +489,12 @@ const Signup = () => {
                     style={{
                       ...inputStyle('confirmPassword'),
                       borderColor: confirmPassword.length > 0
-                        ? passwordsMatch ? 'rgba(90,158,138,0.60)' : 'rgba(176,80,70,0.50)'
-                        : fieldFocus === 'confirmPassword' ? T.inputFocus : T.inputBorder,
+                        ? passwordsMatch
+                          ? 'rgba(90,158,138,0.60)'
+                          : 'rgba(176,80,70,0.50)'
+                        : fieldFocus === 'confirmPassword'
+                          ? T.inputFocus
+                          : T.inputBorder,
                     }}
                   />
                   <button

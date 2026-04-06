@@ -5,6 +5,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useTheme } from '@/context/ThemeContext'
 import { btnPrimary, BROWN_PRIMARY, THEME } from '@/lib/theme'
+import { useRouter } from 'next/navigation'
 
 // ─── ICONS ───────────────────────────────────────────────────
 const IconRings = () => (
@@ -65,15 +66,17 @@ const IconArrowLeft = () => (
 
 // ─── COMPONENT ───────────────────────────────────────────────
 const Login = () => {
+  const router = useRouter()
+
   const { darkMode, toggleTheme, T } = useTheme()
 
-  const [email, setEmail]               = useState('')
-  const [password, setPassword]         = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [rememberMe, setRememberMe]     = useState(false)
-  const [loading, setLoading]           = useState(false)
-  const [error, setError]               = useState('')
-  const [fieldFocus, setFieldFocus]     = useState<string | null>(null)
+  const [rememberMe, setRememberMe] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [fieldFocus, setFieldFocus] = useState<string | null>(null)
   const cardRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -95,8 +98,9 @@ const Login = () => {
     setError('')
     if (!email || !password) { setError('Please fill in all fields.'); return }
     setLoading(true)
-    await new Promise((r) => setTimeout(r, 1400))
+    await new Promise((r) => setTimeout(r, 1600))
     setLoading(false)
+    router.push('/dashboard')
   }
 
   const inputStyle = (field: string) => ({
@@ -120,9 +124,11 @@ const Login = () => {
         <div className="absolute inset-0" style={{ background: T.heroBg }} />
         <div
           className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] rounded-full blur-3xl"
-          style={{ background: darkMode
-            ? 'radial-gradient(ellipse, rgba(160,120,72,0.10) 0%, transparent 70%)'
-            : 'radial-gradient(ellipse, rgba(139,107,71,0.08) 0%, transparent 70%)' }}
+          style={{
+            background: darkMode
+              ? 'radial-gradient(ellipse, rgba(160,120,72,0.10) 0%, transparent 70%)'
+              : 'radial-gradient(ellipse, rgba(139,107,71,0.08) 0%, transparent 70%)'
+          }}
         />
       </div>
 
