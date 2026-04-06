@@ -1,32 +1,45 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+// app/layout.tsx
+import type { Metadata } from 'next'
+import { ThemeProvider } from '@/context/ThemeContext'
+import PageTransition from '@/components/PageTransition'
+import './globals.css'
 
 export const metadata: Metadata = {
-  title: "Vow — Wedding Operating System",
-  description: "Plan the day. Run the day. Vow unifies every fragment of your wedding into one intelligent system.",
-};
+  title: 'Vow — Wedding Operating System',
+  description: 'Plan the day. Run the day.',
+}
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col bg-[#faf8f5] text-[#1c1812]">
-        {children}
+    <html lang="en" suppressHydrationWarning>
+      <head />
+      <body suppressHydrationWarning>
+
+        {/* ── Blocking script: runs before first paint, zero flash ── */}
+        <script
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function(){
+                try {
+                  var s = localStorage.getItem('vow-theme');
+                  var dark = s ? s === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+                  document.documentElement.classList.toggle('dark', dark);
+                  document.documentElement.style.backgroundColor = dark ? '#1E1C1A' : '#F7F3ED';
+                  document.body.style.backgroundColor = dark ? '#1E1C1A' : '#F7F3ED';
+                } catch(e){}
+              })();
+            `,
+          }}
+        />
+
+        <ThemeProvider>
+          <PageTransition>
+            {children}
+          </PageTransition>
+        </ThemeProvider>
+
       </body>
     </html>
-  );
+  )
 }

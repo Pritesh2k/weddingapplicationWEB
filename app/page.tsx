@@ -21,6 +21,9 @@
 'use client'
 
 import React, { useEffect, useRef, useState } from 'react'
+import { useTheme } from '@/context/ThemeContext'
+import { btnPrimary, BROWN_PRIMARY, BROWN_DARK, BROWN_LIGHT, BROWN_PALE } from '@/lib/theme'
+import Link from 'next/link'
 
 declare global {
   interface Window { gsap: any; ScrollTrigger: any }
@@ -89,89 +92,6 @@ const IconChevronDown = () => (
     <path d="M6 9l6 6 6-6" />
   </svg>
 )
-
-// ============================================================
-// ─── THEME CONFIG
-// ─── Edit ONLY this object to retheme the entire site.
-// ─── Dark: charcoal-espresso with warm brown undertones.
-// ─── Light: warm ivory/linen — unchanged.
-// ============================================================
-const THEME = {
-  dark: {
-    // ── Backgrounds ───────────────────────────────────────────
-    // Charcoal with a warm brown undertone — dark elegance
-    bg: '#1E1C1A',   // ← page base. Shift here to go warmer/cooler
-    surface: '#272320',   // ← cards, nav
-    surface2: '#2F2B28',   // ← elevated surfaces
-    // ── Text ─────────────────────────────────────────────────
-    textPrimary: '#F2EDE6',   // warm off-white, never cold
-    textSecondary: '#C9BFB2',   // warm light grey
-    textMuted: '#8A7E74',   // warm mid-grey brown
-    // ── Borders ──────────────────────────────────────────────
-    borderSubtle: 'rgba(242,237,230,0.07)',
-    borderBrown: 'rgba(160,126,84,0.20)',
-    // ── Accent ───────────────────────────────────────────────
-    accentText: '#C4A882',   // champagne — readable on dark
-    // ── Hero ─────────────────────────────────────────────────
-    heroBg: 'radial-gradient(ellipse 130% 85% at 50% -15%, #302620 0%, #272320 45%, #1E1C1A 100%)',
-    heroGlow: 'radial-gradient(ellipse, rgba(160,120,72,0.13) 0%, rgba(110,84,50,0.05) 55%, transparent 75%)',
-    heroGrid: 'rgba(160,120,72,0.45)',
-    heroVignette: 'radial-gradient(ellipse 80% 80% at 50% 50%, transparent 48%, rgba(10,8,6,0.58) 100%)',
-    // ── Command Centre card ───────────────────────────────────
-    cmdBg: '#1E1C1A',
-    cmdBorder: '#38302A',
-    cmdHeaderBorder: 'rgba(56,48,42,0.9)',
-    cmdRowDefault: '#272320',
-    cmdVendorBg: '#2F2B28',
-    cmdVendorBorder: '#38302A',
-    // ── Nav backdrop ─────────────────────────────────────────
-    navBgScrolled: 'rgba(30,28,26,0.92)',
-    mobileDrawerBg: 'rgba(30,28,26,0.96)',
-  },
-  light: {
-    // ── Backgrounds — UNCHANGED ───────────────────────────────
-    bg: '#F7F3ED',
-    surface: '#EDE8E0',
-    surface2: '#E4DDD3',
-    textPrimary: '#1C1510',
-    textSecondary: '#3D2E1E',
-    textMuted: '#7A6A58',
-    borderSubtle: 'rgba(0,0,0,0.08)',
-    borderBrown: 'rgba(139,107,71,0.18)',
-    accentText: '#8B6B47',
-    heroBg: 'radial-gradient(ellipse 120% 80% at 50% -10%, #F0E8D8 0%, #EDE8E0 40%, #F7F3ED 100%)',
-    heroGlow: 'radial-gradient(ellipse, rgba(139,107,71,0.10) 0%, transparent 70%)',
-    heroGrid: 'rgba(139,107,71,0.5)',
-    heroVignette: 'radial-gradient(ellipse 80% 80% at 50% 50%, transparent 50%, rgba(247,243,237,0.4) 100%)',
-    cmdBg: '#F0E8DA',
-    cmdBorder: 'rgba(139,107,71,0.25)',
-    cmdHeaderBorder: 'rgba(139,107,71,0.18)',
-    cmdRowDefault: '#EAE2D8',
-    cmdVendorBg: '#E8E0D4',
-    cmdVendorBorder: 'rgba(139,107,71,0.18)',
-    navBgScrolled: 'rgba(247,243,237,0.92)',
-    mobileDrawerBg: 'rgba(247,243,237,0.96)',
-  },
-  // ── Primary CTA button — change these 2 hex values to restyle ALL buttons ──
-  btn: {
-    from: '#8B6B47',
-    to: '#6E5438',
-    text: '#F7F3ED',
-    shadow: 'rgba(139,107,71,0.28)',
-  },
-}
-
-// ── Derived constants — do not edit, computed from THEME ──────
-const BROWN_PRIMARY = THEME.btn.from
-const BROWN_DARK = THEME.btn.to
-const BROWN_LIGHT = '#A07E5A'
-const BROWN_PALE = '#C4A882'
-
-const btnPrimary = {
-  bg: `linear-gradient(135deg, ${THEME.btn.from} 0%, ${THEME.btn.to} 100%)`,
-  shadow: `0 4px 20px ${THEME.btn.shadow}`,
-  color: THEME.btn.text,
-}
 
 // ─── FEATURES DATA ───────────────────────────────────────────
 const features = [
@@ -335,7 +255,9 @@ const testimonials = [
 // ============================================================
 const page = () => {
 
-  const [darkMode, setDarkMode] = useState(true)
+  // ── Theme from context — no local state needed ────────────
+  const { darkMode, toggleTheme, T } = useTheme()
+
   const [menuOpen, setMenuOpen] = useState(false)
   const [email, setEmail] = useState('')
   const [submitted, setSubmitted] = useState(false)
@@ -361,9 +283,16 @@ const page = () => {
   const logoStripRef = useRef<HTMLDivElement>(null)
   const gsapLoaded = useRef(false)
 
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', darkMode)
-  }, [darkMode])
+  // ── Derived tokens ────────────────────────────────────────
+  const pageBg = T.bg
+  const surfaceBg = T.surface
+  const borderSubtle = T.borderSubtle
+  const borderBrown = T.borderBrown
+  const textPrimary = T.textPrimary
+  const textSecondary = T.textSecondary
+  const textMuted = T.textMuted
+  const accentText = T.accentText
+  const navBg = scrolled ? T.navBg : 'transparent'
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40)
@@ -513,22 +442,6 @@ const page = () => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
-  // ── Pull current mode tokens ─────────────────────────────────
-  const T = darkMode ? THEME.dark : THEME.light
-
-  const pageBg = T.bg
-  const surfaceBg = T.surface
-  const borderSubtle = T.borderSubtle
-  const borderBrown = T.borderBrown
-  const textPrimary = T.textPrimary
-  const textSecondary = T.textSecondary
-  const textMuted = T.textMuted
-  const accentText = T.accentText
-
-  const navBg = scrolled
-    ? `${T.navBgScrolled}`
-    : 'transparent'
-
   return (
     <>
       <noscript>
@@ -539,7 +452,6 @@ const page = () => {
         className="min-h-screen font-sans antialiased overflow-x-hidden transition-colors duration-500"
         style={{ backgroundColor: pageBg, color: textPrimary }}
       >
-
         {/* ════════════════════════════════════════════════════
             COMPONENT: <Navbar />
         ════════════════════════════════════════════════════ */}
@@ -592,7 +504,7 @@ const page = () => {
 
             <div className="flex items-center gap-3">
               <button
-                onClick={() => setDarkMode(!darkMode)}
+                onClick={toggleTheme}
                 className="p-2 rounded-full transition-all duration-300 hover:scale-110 focus:outline-none"
                 style={{ backgroundColor: surfaceBg, border: `1px solid ${borderBrown}`, color: textMuted }}
                 aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
@@ -601,13 +513,13 @@ const page = () => {
                 {darkMode ? <IconSun /> : <IconMoon />}
               </button>
 
-              <button
-                onClick={() => scrollTo('waitlist')}
+              <Link
+                href="/login"
                 className="hidden md:flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold hover:scale-[1.03] transition-all duration-300 focus:outline-none"
                 style={{ background: btnPrimary.bg, boxShadow: btnPrimary.shadow, color: btnPrimary.color }}
               >
                 Get started
-              </button>
+              </Link>
 
               <button
                 onClick={() => setMenuOpen(!menuOpen)}
@@ -683,20 +595,16 @@ const page = () => {
           aria-label="Hero — Plan the day. Run the day."
         >
           <div className="hero-bg absolute inset-0 pointer-events-none select-none" aria-hidden="true">
-            {/* Base gradient — from THEME */}
             <div className="absolute inset-0" style={{ background: T.heroBg }} />
-            {/* Warm glow — from THEME */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] rounded-full blur-3xl"
               style={{ background: T.heroGlow }} />
             <div className="absolute bottom-1/4 left-1/4 w-[500px] h-[400px] rounded-full blur-3xl"
               style={{ background: 'radial-gradient(ellipse, rgba(176,100,90,0.05) 0%, transparent 70%)' }} />
-            {/* Subtle grid — from THEME */}
             <div className="absolute inset-0" style={{
               opacity: darkMode ? 0.025 : 0.04,
               backgroundImage: `linear-gradient(${T.heroGrid} 1px, transparent 1px), linear-gradient(90deg, ${T.heroGrid} 1px, transparent 1px)`,
               backgroundSize: '80px 80px',
             }} />
-            {/* Vignette — from THEME */}
             <div className="absolute inset-0" style={{ background: T.heroVignette }} />
           </div>
 
@@ -754,8 +662,6 @@ const page = () => {
             <span className="text-xs tracking-widest uppercase">Scroll</span>
             <span className="scroll-arrow"><IconChevronDown /></span>
           </div>
-
-          <noscript><style>{`.gsap-hidden{opacity:1!important;transform:none!important}`}</style></noscript>
         </section>
         {/* ════ END <HeroSection /> ════ */}
 
@@ -974,7 +880,6 @@ const page = () => {
                 </ul>
               </div>
 
-              {/* Live mode mock card — themed per mode via THEME tokens */}
               <div className="command-visual w-full max-w-lg mx-auto lg:max-w-none lg:mx-0 lg:w-auto" aria-hidden="true">
                 {darkMode ? (
                   <div
@@ -1110,7 +1015,6 @@ const page = () => {
                   Ceremony modules adapt to your tradition — not the other way around. Mix, blend, and configure without constraint.
                 </p>
 
-                {/* Tradition tabs */}
                 <div
                   className="tradition-reveal flex flex-wrap gap-2 mb-6"
                   role="tablist"
@@ -1149,7 +1053,6 @@ const page = () => {
                   })}
                 </div>
 
-                {/* Active tradition event tags */}
                 {traditions.map((t, i) => {
                   if (i !== activeTradition) return null
                   const tagBg = darkMode ? t.tagBg : t.lightTagBg
@@ -1182,7 +1085,6 @@ const page = () => {
                 })}
               </div>
 
-              {/* Right: feature callout cards */}
               <div className="space-y-4 tradition-reveal">
                 {[
                   { title: 'Faith-agnostic by design', desc: 'No single tradition is hardcoded. Select one or many cultural modules during programme setup.' },
@@ -1504,20 +1406,14 @@ const CmdVendorLight = () => (
     <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: BROWN_PRIMARY }}>Vendor Check-in</p>
     <div className="flex flex-wrap gap-2">
       {[
-        { name: 'Photographer', checked: true },
-        { name: 'Caterer', checked: true },
-        { name: 'Florist', checked: true },
-        { name: 'DJ', checked: false },
-        { name: 'Transport', checked: true },
+        { name: 'Photographer', checked: true }, { name: 'Caterer', checked: true },
+        { name: 'Florist', checked: true }, { name: 'DJ', checked: false }, { name: 'Transport', checked: true },
       ].map((v) => (
-        <span
-          key={v.name}
-          className="text-xs px-2.5 py-1.5 rounded-full font-semibold"
+        <span key={v.name} className="text-xs px-2.5 py-1.5 rounded-full font-semibold"
           style={v.checked
             ? { background: 'rgba(58,122,104,0.12)', color: '#3A7A68', border: '1px solid rgba(58,122,104,0.28)' }
             : { background: 'rgba(139,107,71,0.12)', color: BROWN_PRIMARY, border: `1px solid rgba(139,107,71,0.28)` }
-          }
-        >
+          }>
           {v.checked ? '✓ ' : '⏳ '}{v.name}
         </span>
       ))}
