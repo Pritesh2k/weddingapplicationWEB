@@ -16,6 +16,8 @@ import PrioritiesCard from '@/components/Programme/PrioritiesCard/component'
 import DetailsCard from '@/components/Programme/DetailsCard/component'
 import type { Programme } from '@/lib/Programme/types'
 
+import HeroCardMobile from '@/components/Programme/HeroCard/mobile'
+
 gsap.registerPlugin(ScrollTrigger)
 
 export default function ProgrammePage() {
@@ -27,11 +29,9 @@ export default function ProgrammePage() {
     const [programme, setProgramme] = useState<Programme | null>(null)
     const [ready, setReady] = useState(false)
     const [notFound, setNotFound] = useState(false)
-    const mainRef = useRef<HTMLElement>(null)
+    const rightColRef = useRef<HTMLDivElement>(null)
 
-    const handleProgrammeChange = (updated: Programme) => {
-        setProgramme(updated)
-    }
+    const handleProgrammeChange = (updated: Programme) => setProgramme(updated)
 
     useEffect(() => {
         if (!progId) { setNotFound(true); setReady(true); return }
@@ -44,79 +44,188 @@ export default function ProgrammePage() {
     }, [progId])
 
     useEffect(() => {
-        if (!ready || !programme || !mainRef.current) return
+        if (!ready || !programme || !rightColRef.current) return
         const ctx = gsap.context(() => {
             gsap.from('.vow-section', {
-                opacity: 0, y: 24, duration: 0.55,
-                ease: 'power3.out', stagger: 0.09, clearProps: 'all',
+                opacity: 0, y: 20, duration: 0.5,
+                ease: 'power3.out', stagger: 0.07, clearProps: 'all',
             })
-        }, mainRef)
+        }, rightColRef)
         return () => ctx.revert()
     }, [ready, programme])
 
-    if (!ready) {
-        return (
-            <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: T.bg }}>
-                <div className="w-6 h-6 rounded-full animate-pulse" style={{ background: btnPrimary.bg }} />
-            </div>
-        )
-    }
+    if (!ready) return (
+        <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: T.bg }}>
+            <div className="w-6 h-6 rounded-full animate-pulse" style={{ background: btnPrimary.bg }} />
+        </div>
+    )
 
-    if (notFound || !programme) {
-        return (
-            <div className="min-h-screen flex flex-col items-center justify-center px-4 text-center"
-                style={{ backgroundColor: T.bg }}>
-                <div
-                    className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mb-5"
-                    style={{ backgroundColor: T.surface, border: `1px solid ${T.borderSubtle}` }}
-                >
-                    💍
-                </div>
-                <h1 className="text-lg font-bold mb-2" style={{ color: T.textPrimary }}>Programme not found</h1>
-                <p className="text-sm mb-7 max-w-xs" style={{ color: T.textMuted }}>
-                    This programme may have been deleted or the link is invalid.
-                </p>
-                <button
-                    onClick={() => navigate('/dashboard')}
-                    className="px-5 py-2.5 rounded-xl text-sm font-semibold
-                     hover:scale-[1.02] transition-all duration-200 focus:outline-none"
-                    style={{ background: btnPrimary.bg, boxShadow: btnPrimary.shadow, color: btnPrimary.color }}
-                >
-                    Back to Dashboard
-                </button>
+    if (notFound || !programme) return (
+        <div className="min-h-screen flex flex-col items-center justify-center px-4 text-center"
+            style={{ backgroundColor: T.bg }}>
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mb-5"
+                style={{ backgroundColor: T.surface, border: `1px solid ${T.borderSubtle}` }}>
+                💍
             </div>
-        )
-    }
+            <h1 className="text-lg font-bold mb-2" style={{ color: T.textPrimary }}>Programme not found</h1>
+            <p className="text-sm mb-7 max-w-xs" style={{ color: T.textMuted }}>
+                This programme may have been deleted or the link is invalid.
+            </p>
+            <button
+                onClick={() => navigate('/dashboard')}
+                className="px-5 py-2.5 rounded-xl text-sm font-semibold
+                   hover:scale-[1.02] transition-all duration-200 focus:outline-none"
+                style={{ background: btnPrimary.bg, boxShadow: btnPrimary.shadow, color: btnPrimary.color }}
+            >
+                Back to Dashboard
+            </button>
+        </div>
+    )
 
     return (
-        <div className="min-h-screen font-sans antialiased" style={{ backgroundColor: T.bg, color: T.textPrimary }}>
-            {/* Ambient bg */}
+        <div
+            className="font-sans antialiased flex flex-col"
+            style={{
+                backgroundColor: T.bg,
+                color: T.textPrimary,
+                height: '100dvh',
+                overflow: 'hidden',
+            }}
+        >
+            {/* Ambient background */}
             <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }} aria-hidden>
                 <div className="absolute inset-0" style={{ background: T.heroBg }} />
                 <div
-                    className="absolute top-0 left-1/2 -translate-x-1/2 w-175 h-125 rounded-full blur-3xl"
+                    className="absolute top-0 left-1/2 -translate-x-1/2
+                     w-150 lg:w-225 h-100 rounded-full blur-3xl opacity-60"
                     style={{ background: T.heroGlow }}
                 />
             </div>
 
-            <ProgrammeHeader />
+            {/* Header */}
+            <div className="relative shrink-0" style={{ zIndex: 50 }}>
+                <ProgrammeHeader />
+            </div>
 
-            <main
-                ref={mainRef}
-                className="relative max-w-2xl mx-auto px-3 sm:px-4 md:px-6
-                   pt-6 sm:pt-8 md:pt-10 pb-20 sm:pb-24 space-y-6 sm:space-y-8"
-                style={{ zIndex: 10 }}
-            >
-                <HeroCard programme={programme} onChange={handleProgrammeChange} />
-                <PlanningModules />
-                <Timeline subEvents={programme.subEvents} />
+            {/* ── BOARD ─────────────────────────────────────────── */}
+            <div className="relative flex-1 overflow-hidden" style={{ zIndex: 10 }}>
+                <BoardGrid
+                    rightColRef={rightColRef}
+                    heroCard={
+                        <div className="vow-section h-full">
+                            <HeroCard programme={programme} onChange={handleProgrammeChange} />
+                        </div>
+                    }
+                    mobileHero={
+                        <div className="vow-section">
+                            <HeroCardMobile programme={programme} onChange={handleProgrammeChange} />
+                        </div>
+                    }
+                    rightContent={
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
-                {/* Priorities + Details side by side */}
-                <div className="vow-section grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                    <PrioritiesCard priorities={programme.priorities} />
-                    <DetailsCard programme={programme} />
-                </div>
-            </main>
+                            <div className="vow-section">
+                                <PlanningModules />
+                            </div>
+
+                            {programme.subEvents.length > 0 && (
+                                <div className="vow-section">
+                                    <Timeline subEvents={programme.subEvents} />
+                                </div>
+                            )}
+
+                            <div
+                                style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+                                    gap: '16px',
+                                }}
+                            >
+                                <div className="vow-section">
+                                    <PrioritiesCard priorities={programme.priorities} />
+                                </div>
+                                <div className="vow-section">
+                                    <DetailsCard programme={programme} />
+                                </div>
+                            </div>
+
+                        </div>
+                    }
+                />
+            </div>
         </div>
+    )
+}
+
+// ── BoardGrid ─────────────────────────────────────────────────
+function BoardGrid({
+    heroCard,
+    mobileHero,
+    rightContent,
+    rightColRef,
+}: {
+    heroCard: React.ReactNode
+    mobileHero: React.ReactNode
+    rightContent: React.ReactNode
+    rightColRef: React.RefObject<HTMLDivElement | null>
+}) {
+    const { T } = useTheme()
+
+    return (
+        <>
+            {/* ── Mobile / tablet (<lg) ─────────────────────────
+          Compact hero banner at top, content fills rest
+      ──────────────────────────────────────────────────── */}
+            <div className="flex flex-col h-full lg:hidden" style={{ padding: '12px 16px 0', gap: '12px' }}>
+                <div style={{ flexShrink: 0 }}>
+                    {mobileHero}
+                </div>
+                <div
+                    className="flex-1 overflow-y-auto"
+                    style={{
+                        paddingBottom: '24px',
+                        scrollbarWidth: 'thin',
+                        scrollbarColor: `${T.borderBrown} transparent`,
+                    }}
+                >
+                    {rightContent}
+                </div>
+            </div>
+
+            {/* ── Desktop (≥lg) ─────────────────────────────────
+          Hero fills full board height, right col scrolls
+      ──────────────────────────────────────────────────── */}
+            <div
+                className="hidden lg:grid h-full"
+                style={{
+                    gridTemplateColumns: 'min(480px, 38%) 1fr',
+                    gap: '24px',
+                    padding: '28px 40px 0',
+                    alignItems: 'stretch',   // both cols same height
+                }}
+            >
+                {/* Left — full height hero */}
+                <div style={{ height: '95%' }}>
+                    {heroCard}
+                </div>
+
+                {/* Right — scrollable */}
+                <div style={{ height: '100%', overflow: 'hidden', minWidth: 0 }}>
+                    <div
+                        ref={rightColRef}
+                        style={{
+                            height: '100%',
+                            overflowY: 'auto',
+                            paddingBottom: '32px',
+                            paddingRight: '4px',
+                            scrollbarWidth: 'thin',
+                            scrollbarColor: `${T.borderBrown} transparent`,
+                        }}
+                    >
+                        {rightContent}
+                    </div>
+                </div>
+            </div>
+        </>
     )
 }

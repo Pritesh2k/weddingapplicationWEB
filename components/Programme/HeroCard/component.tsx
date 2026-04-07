@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useCallback } from 'react'
-import { btnPrimary, BROWN_PRIMARY, BROWN_LIGHT } from '@/lib/theme'
+import { BROWN_PRIMARY, BROWN_LIGHT } from '@/lib/theme'
 import { useTheme } from '@/context/ThemeContext'
 import type { Programme } from '@/lib/Programme/types'
 import { FORMAT_LABELS } from '@/lib/Programme/types'
@@ -13,7 +13,6 @@ interface Props {
     onChange: (updated: Programme) => void
 }
 
-// ── Generic inline-edit hook ──────────────────────────────────
 function useInlineEdit(initial: string, onSave: (v: string) => void) {
     const [editing, setEditing] = useState(false)
     const [value, setValue] = useState(initial)
@@ -30,7 +29,6 @@ function useInlineEdit(initial: string, onSave: (v: string) => void) {
     return { editing, value, setValue, inputRef, open, save, cancel, onKey }
 }
 
-// ── Editable stat cell ────────────────────────────────────────
 interface StatCellProps {
     label: string
     display: string
@@ -38,7 +36,6 @@ interface StatCellProps {
     value: string
     inputRef: React.RefObject<HTMLInputElement | null>
     type?: 'text' | 'number'
-    prefix?: string
     onOpen: () => void
     onSave: () => void
     onCancel: () => void
@@ -49,26 +46,24 @@ interface StatCellProps {
 
 function StatCell({
     label, display, editing, value, inputRef,
-    type = 'text', onOpen, onSave, onCancel, onKey, onChange, divider = false,
+    type = 'text', onOpen, onSave, onKey, onChange, divider = false,
 }: StatCellProps) {
-    const { T } = useTheme()
+    const { darkMode, T } = useTheme()
 
     return (
         <div
             className="relative flex flex-col items-center justify-center
-                 py-4 sm:py-5 cursor-pointer select-none
-                 transition-colors duration-150 group"
+                 py-5 cursor-pointer select-none transition-colors duration-150 group"
             style={{
                 borderRight: divider ? `1px solid ${T.borderSubtle}` : undefined,
                 backgroundColor: editing
-                    ? (document.documentElement.classList.contains('dark')
-                        ? 'rgba(139,107,71,0.06)' : 'rgba(139,107,71,0.04)')
+                    ? darkMode ? 'rgba(139,107,71,0.06)' : 'rgba(139,107,71,0.04)'
                     : 'transparent',
             }}
             onClick={() => !editing && onOpen()}
         >
             {editing ? (
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 mb-1">
                     <input
                         ref={inputRef}
                         type={type}
@@ -76,10 +71,10 @@ function StatCell({
                         onChange={(e) => onChange(e.target.value)}
                         onBlur={onSave}
                         onKeyDown={onKey}
-                        className="text-base sm:text-lg font-bold text-center leading-none bg-transparent
-                       focus:outline-none"
+                        className="text-base sm:text-lg font-bold text-center leading-none
+                       bg-transparent focus:outline-none"
                         style={{
-                            color: 'var(--accent-text)',
+                            color: T.accentText,
                             borderBottom: `1.5px solid ${BROWN_PRIMARY}`,
                             width: type === 'number' ? '72px' : '90px',
                             paddingBottom: '1px',
@@ -87,7 +82,7 @@ function StatCell({
                     />
                     <button
                         onMouseDown={(e) => { e.preventDefault(); onSave() }}
-                        className="rounded-full p-0.5 focus:outline-none transition-opacity"
+                        className="rounded-full p-0.5 focus:outline-none"
                         style={{ color: BROWN_PRIMARY, opacity: 0.8 }}
                     >
                         <IconCheck />
@@ -98,21 +93,21 @@ function StatCell({
                     className="text-base sm:text-lg font-bold leading-none mb-1
                      group-hover:opacity-70 transition-opacity duration-150
                      max-w-full px-2 truncate text-center"
-                    style={{ color: 'var(--text-primary)' }}
+                    style={{ color: T.textPrimary }}
                 >
                     {display}
                 </p>
             )}
 
             <p
-                className="text-[10px] mt-1 transition-colors duration-150"
-                style={{ color: editing ? BROWN_PRIMARY : 'var(--text-muted)' }}
+                className="text-[10px] transition-colors duration-150"
+                style={{ color: editing ? BROWN_PRIMARY : T.textMuted }}
             >
                 {label}
                 {!editing && (
                     <span
-                        className="ml-1 opacity-0 group-hover:opacity-40 transition-opacity duration-150
-                       text-[9px]"
+                        className="ml-1 opacity-0 group-hover:opacity-40
+                       transition-opacity duration-150 text-[9px]"
                         style={{ color: BROWN_PRIMARY }}
                     >
                         ✎
@@ -120,7 +115,6 @@ function StatCell({
                 )}
             </p>
 
-            {/* Active underline indicator */}
             {editing && (
                 <div
                     className="absolute bottom-0 left-4 right-4 h-px rounded-full"
@@ -131,7 +125,6 @@ function StatCell({
     )
 }
 
-// ── Editable pill ─────────────────────────────────────────────
 interface EditPillProps {
     icon: React.ReactNode
     display: string | null
@@ -149,7 +142,7 @@ interface EditPillProps {
 
 function EditPill({
     icon, display, editing, value, inputRef, type = 'text',
-    placeholder, onOpen, onSave, onCancel, onKey, onChange,
+    placeholder, onOpen, onSave, onKey, onChange,
 }: EditPillProps) {
     const { darkMode, T } = useTheme()
 
@@ -204,7 +197,6 @@ function EditPill({
                     >
                         {display || placeholder}
                     </span>
-                    {/* Hover hint */}
                     <span
                         className="text-[9px] opacity-0 group-hover:opacity-40
                        transition-opacity duration-200 ml-0.5"
@@ -218,7 +210,6 @@ function EditPill({
     )
 }
 
-// ── Main component ────────────────────────────────────────────
 export default function HeroCard({ programme: p, onChange }: Props) {
     const { darkMode, T } = useTheme()
 
@@ -226,11 +217,7 @@ export default function HeroCard({ programme: p, onChange }: Props) {
     const weddingDate = p.dateFrom
         ? fmtDate(p.dateFrom, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
         : null
-    const weddingDateShort = p.dateFrom
-        ? fmtDate(p.dateFrom, { day: 'numeric', month: 'short', year: 'numeric' })
-        : null
 
-    // ── Persist ────────────────────────────────────────────────
     const save = useCallback((patch: Partial<Programme>) => {
         const updated = { ...p, ...patch }
         onChange(updated)
@@ -244,7 +231,6 @@ export default function HeroCard({ programme: p, onChange }: Props) {
         } catch { }
     }, [p, onChange])
 
-    // ── Field editors ──────────────────────────────────────────
     const dateEdit = useInlineEdit(p.dateFrom, (v) => save({ dateFrom: v }))
     const regionEdit = useInlineEdit(p.region, (v) => save({ region: v }))
     const guestsEdit = useInlineEdit(p.guestEstimate, (v) => save({ guestEstimate: v }))
@@ -252,64 +238,50 @@ export default function HeroCard({ programme: p, onChange }: Props) {
 
     return (
         <div
-            className="vow-section rounded-2xl overflow-hidden"
+            className="rounded-2xl overflow-hidden flex flex-col"
             style={{
                 backgroundColor: T.surface,
                 border: `1px solid ${T.borderSubtle}`,
                 boxShadow: darkMode
                     ? '0 24px 60px rgba(0,0,0,0.40)'
                     : '0 8px 40px rgba(139,107,71,0.10)',
+                height: '100%',      // ← fills the grid cell
+                minHeight: 'unset',  // ← remove the clamp, grid handles sizing
             }}
         >
-            {/* Gradient accent line */}
+            {/* Top gradient accent */}
             <div
-                className="h-px w-full"
+                className="h-px w-full shrink-0"
                 style={{
                     background: `linear-gradient(90deg, transparent, ${BROWN_PRIMARY}88, ${BROWN_LIGHT}88, transparent)`,
                 }}
             />
 
-            <div className="px-5 sm:px-7 md:px-8 pt-6 sm:pt-7 pb-0">
+            {/* ── Info block ───────────────────────────────────── */}
+            <div className="px-6 sm:px-8 pt-6 sm:pt-7 pb-5">
 
-                {/* Label + countdown */}
-                <div className="flex items-start justify-between mb-5">
-                    <p className="text-[10px] font-bold tracking-[0.18em] uppercase mt-0.5" style={{ color: T.accentText }}>
-                        Wedding Programme
-                    </p>
-                    {days !== null && days > 0 && (
-                        <div className="flex items-baseline gap-1 px-3 py-2 rounded-xl shrink-0"
-                            style={{
-                                backgroundColor: darkMode ? 'rgba(139,107,71,0.10)' : 'rgba(139,107,71,0.07)',
-                                border: `1px solid ${darkMode ? 'rgba(139,107,71,0.22)' : 'rgba(139,107,71,0.16)'}`,
-                            }}>
-                            <span className="text-2xl font-bold leading-none" style={{ color: T.accentText }}>{days}</span>
-                            <span className="text-xs" style={{ color: T.textMuted }}>days</span>
-                        </div>
-                    )}
-                    {days === 0 && (
-                        <span className="px-3 py-1.5 rounded-xl text-xs font-semibold"
-                            style={{ backgroundColor: 'rgba(90,158,138,0.12)', border: '1px solid rgba(90,158,138,0.25)', color: '#7ABDB0' }}>
-                            🎉 Today!
-                        </span>
-                    )}
-                    {days !== null && days < 0 && (
-                        <span className="px-3 py-1.5 rounded-xl text-xs font-semibold"
-                            style={{ backgroundColor: 'rgba(90,158,138,0.12)', border: '1px solid rgba(90,158,138,0.25)', color: '#7ABDB0' }}>
-                            ✓ Complete
-                        </span>
-                    )}
-                </div>
+                <p
+                    className="text-[10px] font-bold tracking-[0.18em] uppercase mb-4"
+                    style={{ color: T.accentText }}
+                >
+                    Wedding Programme
+                </p>
 
-                {/* Title + names */}
-                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight leading-tight mb-1" style={{ color: T.textPrimary }}>
+                <h1
+                    className="font-bold tracking-tight leading-tight mb-1"
+                    style={{
+                        color: T.textPrimary,
+                        fontSize: 'clamp(22px, 3vw, 30px)',
+                    }}
+                >
                     {p.title}
                 </h1>
                 <p className="text-sm font-semibold mb-5" style={{ color: T.accentText }}>
                     {p.coupleNameA} & {p.coupleNameB}
                 </p>
 
-                {/* Editable pills — date & location only */}
-                <div className="flex flex-wrap gap-1.5 mb-4">
+                {/* Pills */}
+                <div className="flex flex-wrap gap-1.5 mb-3">
                     <EditPill
                         icon={<IconCalendar />}
                         display={weddingDate}
@@ -341,32 +313,114 @@ export default function HeroCard({ programme: p, onChange }: Props) {
                 </div>
 
                 {/* Culture / format tags */}
-                <div className="flex flex-wrap gap-1.5 pb-5">
+                <div className="flex flex-wrap gap-1.5">
                     {p.format && (
-                        <span className="text-[11px] px-2.5 py-1 rounded-full font-semibold"
+                        <span
+                            className="text-[11px] px-2.5 py-1 rounded-full font-semibold"
                             style={{
                                 backgroundColor: darkMode ? 'rgba(139,107,71,0.18)' : 'rgba(139,107,71,0.10)',
                                 border: `1px solid ${BROWN_PRIMARY}`,
                                 color: T.accentText,
-                            }}>
+                            }}
+                        >
                             {FORMAT_LABELS[p.format] ?? p.format}
                         </span>
                     )}
                     {p.cultures.map((c) => (
-                        <span key={c} className="text-[11px] px-2.5 py-1 rounded-full font-medium capitalize"
-                            style={{ backgroundColor: T.surface, border: `1px solid ${T.borderSubtle}`, color: T.textSecondary }}>
+                        <span
+                            key={c}
+                            className="text-[11px] px-2.5 py-1 rounded-full font-medium capitalize"
+                            style={{
+                                backgroundColor: T.surface,
+                                border: `1px solid ${T.borderSubtle}`,
+                                color: T.textSecondary,
+                            }}
+                        >
                             {c}
                         </span>
                     ))}
                 </div>
             </div>
 
-            {/* Stats strip — Events (read-only), Guests, Budget (both editable) */}
+            {/* Divider */}
+            <div className="mx-6 sm:mx-8 h-px shrink-0" style={{ backgroundColor: T.borderSubtle }} />
+
+            {/* ── Countdown — flex-1 so it fills remaining space ── */}
+            <div className="flex-1 flex flex-col items-center justify-center px-6 py-8">
+
+                {days !== null && days > 0 && (
+                    <>
+                        <p
+                            className="text-[11px] font-bold tracking-[0.2em] uppercase mb-4"
+                            style={{ color: T.textMuted }}
+                        >
+                            Days until your wedding
+                        </p>
+                        <p
+                            className="font-bold leading-none tracking-tight"
+                            style={{
+                                fontSize: 'clamp(64px, 9vw, 96px)',
+                                color: T.accentText,
+                                fontVariantNumeric: 'tabular-nums',
+                            }}
+                        >
+                            {days}
+                        </p>
+                        <div
+                            className="mt-4 rounded-full"
+                            style={{
+                                width: '48px',
+                                height: '1px',
+                                background: `linear-gradient(90deg, transparent, ${BROWN_PRIMARY}, transparent)`,
+                            }}
+                        />
+                        <p
+                            className="mt-4 text-xs tracking-wide text-center"
+                            style={{ color: T.textMuted }}
+                        >
+                            {weddingDate}
+                        </p>
+                    </>
+                )}
+
+                {days === 0 && (
+                    <>
+                        <p className="text-[11px] font-bold tracking-[0.2em] uppercase mb-4"
+                            style={{ color: T.textMuted }}>
+                            It's your wedding day
+                        </p>
+                        <p className="text-5xl">🎉</p>
+                        <p className="mt-4 text-sm font-semibold tracking-wide" style={{ color: '#7ABDB0' }}>
+                            Today!
+                        </p>
+                    </>
+                )}
+
+                {days !== null && days < 0 && (
+                    <>
+                        <p className="text-[11px] font-bold tracking-[0.2em] uppercase mb-4"
+                            style={{ color: T.textMuted }}>
+                            Wedding completed
+                        </p>
+                        <p className="text-4xl font-bold" style={{ color: '#7ABDB0' }}>✓</p>
+                        <p className="mt-4 text-xs tracking-wide" style={{ color: T.textMuted }}>
+                            {weddingDate}
+                        </p>
+                    </>
+                )}
+
+                {days === null && (
+                    <p className="text-xs text-center" style={{ color: T.textMuted }}>
+                        Set a wedding date to see your countdown
+                    </p>
+                )}
+            </div>
+
+            {/* ── Stats strip ──────────────────────────────────── */}
             <div
-                className="grid grid-cols-3"
+                className="grid grid-cols-3 shrink-0"
                 style={{ borderTop: `1px solid ${T.borderSubtle}` }}
             >
-                {/* Events — read only */}
                 <div
                     className="flex flex-col items-center py-4 sm:py-5"
                     style={{ borderRight: `1px solid ${T.borderSubtle}` }}
@@ -377,7 +431,6 @@ export default function HeroCard({ programme: p, onChange }: Props) {
                     <p className="text-[10px]" style={{ color: T.textMuted }}>Events</p>
                 </div>
 
-                {/* Guests — editable */}
                 <StatCell
                     label="Guests"
                     display={p.guestEstimate || '—'}
@@ -393,7 +446,6 @@ export default function HeroCard({ programme: p, onChange }: Props) {
                     divider
                 />
 
-                {/* Budget — editable */}
                 <StatCell
                     label="Budget"
                     display={
