@@ -5,8 +5,12 @@ import React, { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useTheme } from '@/context/ThemeContext'
 import { btnPrimary, BROWN_PRIMARY, THEME } from '@/lib/theme'
+import { useRouter } from 'next/navigation'                    // ← added
 
-// ─── ICONS ───────────────────────────────────────────────────
+import { getFriendlyError } from '@/components/Auth/shared'   // ← GoogleMark/Divider removed (unused)
+import { useAuth } from '@/context/Auth/AuthContext'
+
+// ─── ICONS (all unchanged) ────────────────────────────────────
 const IconRings = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5">
     <circle cx="8" cy="12" r="5" /><circle cx="16" cy="12" r="5" />
@@ -74,7 +78,7 @@ const IconCheck = () => (
   </svg>
 )
 
-// ─── PASSWORD STRENGTH ────────────────────────────────────────
+// ─── PASSWORD STRENGTH (unchanged) ───────────────────────────
 const getPasswordStrength = (pw: string): { score: number; label: string; color: string } => {
   if (!pw) return { score: 0, label: '', color: 'transparent' }
   let score = 0
@@ -83,9 +87,9 @@ const getPasswordStrength = (pw: string): { score: number; label: string; color:
   if (/[0-9]/.test(pw)) score++
   if (/[^A-Za-z0-9]/.test(pw)) score++
   const map = [
-    { score: 1, label: 'Weak', color: '#E05A4A' },
-    { score: 2, label: 'Fair', color: '#D4AA66' },
-    { score: 3, label: 'Good', color: '#7ABDB0' },
+    { score: 1, label: 'Weak',   color: '#E05A4A' },
+    { score: 2, label: 'Fair',   color: '#D4AA66' },
+    { score: 3, label: 'Good',   color: '#7ABDB0' },
     { score: 4, label: 'Strong', color: '#5A9E8A' },
   ]
   return map[score - 1] ?? { score: 0, label: '', color: 'transparent' }
@@ -94,21 +98,24 @@ const getPasswordStrength = (pw: string): { score: number; label: string; color:
 // ─── COMPONENT ───────────────────────────────────────────────
 const Signup = () => {
   const { darkMode, toggleTheme, T } = useTheme()
+  const router                       = useRouter()                        // ← added
 
-  const [fullName, setFullName] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirm, setShowConfirm] = useState(false)
-  const [agreedToTerms, setAgreedToTerms] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [fieldFocus, setFieldFocus] = useState<string | null>(null)
-  const [submitted, setSubmitted] = useState(false)
+  // ── Auth ────────────────────────────────────────────────────
+  const { signInGoogle, signUpEmail, loading: authLoading } = useAuth()  // ← added
+
+  const [fullName,         setFullName]         = useState('')
+  const [email,            setEmail]            = useState('')
+  const [password,         setPassword]         = useState('')
+  const [confirmPassword,  setConfirmPassword]  = useState('')
+  const [showPassword,     setShowPassword]     = useState(false)
+  const [showConfirm,      setShowConfirm]      = useState(false)
+  const [agreedToTerms,    setAgreedToTerms]    = useState(false)
+  const [error,            setError]            = useState('')
+  const [fieldFocus,       setFieldFocus]       = useState<string | null>(null)
+  const [submitted,        setSubmitted]        = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
 
-  const strength = getPasswordStrength(password)
+  const strength       = getPasswordStrength(password)
   const passwordsMatch = confirmPassword.length > 0 && password === confirmPassword
 
   useEffect(() => {
@@ -125,17 +132,31 @@ const Signup = () => {
     })
   }, [])
 
+  // ── Google sign-up ──────────────────────────────────────────
+  const handleGoogle = async () => {
+    setError('')
+    try {
+      await signInGoogle()
+      router.push('/dashboard')
+    } catch (e: any) {
+      setError(getFriendlyError(e.code))
+    }
+  }
+
+  // ── Email sign-up ───────────────────────────────────────────
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     if (!fullName || !email || !password || !confirmPassword) { setError('Please fill in all fields.'); return }
-    if (password !== confirmPassword) { setError('Passwords do not match.'); return }
-    if (strength.score < 2) { setError('Please choose a stronger password.'); return }
-    if (!agreedToTerms) { setError('Please agree to the Terms of Service to continue.'); return }
-    setLoading(true)
-    await new Promise((r) => setTimeout(r, 1600))
-    setLoading(false)
-    setSubmitted(true)
+    if (password !== confirmPassword)  { setError('Passwords do not match.'); return }
+    if (strength.score < 2)            { setError('Please choose a stronger password.'); return }
+    if (!agreedToTerms)                { setError('Please agree to the Terms of Service to continue.'); return }
+    try {
+      await signUpEmail(email, password, fullName)   // ← real call
+      setSubmitted(true)                              // show success screen (no redirect — email verify flow)
+    } catch (e: any) {
+      setError(getFriendlyError(e.code))
+    }
   }
 
   const inputStyle = (field: string): React.CSSProperties => ({
@@ -151,7 +172,7 @@ const Signup = () => {
       : 'none',
   })
 
-  // ── Success state ─────────────────────────────────────────
+  // ── Success state (unchanged) ───────────────────────────────
   if (submitted) {
     return (
       <div
@@ -201,7 +222,7 @@ const Signup = () => {
       className="min-h-screen font-sans antialiased flex flex-col"
       style={{ backgroundColor: T.bg, color: T.textPrimary }}
     >
-      {/* ── Background glow ──────────────────────────────── */}
+      {/* Background glow — unchanged */}
       <div className="fixed inset-0 pointer-events-none" aria-hidden="true">
         <div className="absolute inset-0" style={{ background: T.heroBg }} />
         <div
@@ -214,7 +235,7 @@ const Signup = () => {
         />
       </div>
 
-      {/* ── Header — clean, minimal ───────────────────────── */}
+      {/* Header — unchanged */}
       <header
         className="relative z-10 flex items-center justify-between px-6 lg:px-10 h-16"
         style={{
@@ -223,7 +244,6 @@ const Signup = () => {
           borderBottom: `1px solid ${T.borderSubtle}`,
         }}
       >
-        {/* Home link */}
         <Link
           href="/"
           className="flex items-center gap-2 text-sm font-medium transition-colors duration-200 focus:outline-none group"
@@ -237,7 +257,6 @@ const Signup = () => {
           <span className="hidden sm:inline">Home</span>
         </Link>
 
-        {/* Logo — centred */}
         <Link href="/" className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2 focus:outline-none">
           <div
             className="w-7 h-7 rounded-full flex items-center justify-center"
@@ -248,7 +267,6 @@ const Signup = () => {
           <span className="font-semibold tracking-tight text-lg" style={{ color: T.textPrimary }}>Vow</span>
         </Link>
 
-        {/* Theme toggle */}
         <button
           onClick={toggleTheme}
           className="p-2 rounded-full transition-all duration-300 hover:scale-110 focus:outline-none"
@@ -260,21 +278,17 @@ const Signup = () => {
         </button>
       </header>
 
-      {/* ── Main ─────────────────────────────────────────── */}
+      {/* Main */}
       <main className="relative z-10 flex-1 flex items-center justify-center px-4 py-12">
         <div ref={cardRef} className="w-full max-w-md">
 
-          {/* ── Tab switcher — above card ─────────────────── */}
+          {/* Tab switcher — unchanged */}
           <div
             className="flex items-center rounded-2xl p-1 mb-3 gap-1"
-            style={{
-              backgroundColor: T.surface,
-              border: `1px solid ${T.borderBrown}`,
-            }}
+            style={{ backgroundColor: T.surface, border: `1px solid ${T.borderBrown}` }}
             role="tablist"
             aria-label="Authentication mode"
           >
-            {/* Sign in tab — INACTIVE */}
             <Link
               href="/login"
               role="tab"
@@ -286,7 +300,6 @@ const Signup = () => {
             >
               Sign in
             </Link>
-            {/* Create account tab — ACTIVE */}
             <Link
               href="/signup"
               role="tab"
@@ -298,7 +311,7 @@ const Signup = () => {
             </Link>
           </div>
 
-          {/* ── Card ─────────────────────────────────────── */}
+          {/* Card */}
           <div
             className="rounded-2xl p-8 md:p-10"
             style={{
@@ -309,7 +322,6 @@ const Signup = () => {
                 : '0 12px 40px rgba(139,107,71,0.10), 0 2px 8px rgba(0,0,0,0.05)',
             }}
           >
-            {/* Heading */}
             <div className="mb-8">
               <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: T.accentText }}>
                 Get started
@@ -322,26 +334,35 @@ const Signup = () => {
               </p>
             </div>
 
-            {/* Google SSO */}
+            {/* ── Google button — now wired ───────────────── */}
             <button
               type="button"
-              className="w-full flex items-center justify-center gap-3 py-3 rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-[1.01] focus:outline-none mb-6"
-              style={{ backgroundColor: T.surface2, border: `1px solid ${T.borderBrown}`, color: T.textPrimary }}
-              onMouseEnter={(e) => (e.currentTarget.style.borderColor = T.accentText)}
+              onClick={handleGoogle}
+              disabled={authLoading}
+              className="w-full flex items-center justify-center gap-3 py-3 rounded-xl
+                         text-sm font-semibold transition-all duration-200
+                         hover:scale-[1.01] focus:outline-none mb-6
+                         disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{
+                backgroundColor: T.surface2,
+                border: `1px solid ${T.borderBrown}`,
+                color: T.textPrimary,
+              }}
+              onMouseEnter={(e) => { if (!authLoading) (e.currentTarget.style.borderColor = T.accentText) }}
               onMouseLeave={(e) => (e.currentTarget.style.borderColor = T.borderBrown)}
             >
               <IconGoogle />
-              Continue with Google
+              {authLoading ? 'Signing in…' : 'Continue with Google'}
             </button>
 
-            {/* Divider */}
+            {/* Divider — unchanged */}
             <div className="flex items-center gap-3 mb-6">
               <div className="flex-1 h-px" style={{ backgroundColor: T.borderSubtle }} />
               <span className="text-xs font-medium" style={{ color: T.textMuted }}>or sign up with email</span>
               <div className="flex-1 h-px" style={{ backgroundColor: T.borderSubtle }} />
             </div>
 
-            {/* Error banner */}
+            {/* Error banner — unchanged */}
             {error && (
               <div
                 className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm mb-5"
@@ -352,10 +373,9 @@ const Signup = () => {
               </div>
             )}
 
-            {/* Form */}
+            {/* Form — unchanged except onSubmit */}
             <form onSubmit={handleSubmit} noValidate className="space-y-4">
 
-              {/* Full name */}
               <div>
                 <label htmlFor="fullName" className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: T.textMuted }}>
                   Full name
@@ -380,7 +400,6 @@ const Signup = () => {
                 </div>
               </div>
 
-              {/* Email */}
               <div>
                 <label htmlFor="email" className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: T.textMuted }}>
                   Email address
@@ -405,7 +424,6 @@ const Signup = () => {
                 </div>
               </div>
 
-              {/* Password */}
               <div>
                 <label htmlFor="password" className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: T.textMuted }}>
                   Password
@@ -440,7 +458,7 @@ const Signup = () => {
                   </button>
                 </div>
 
-                {/* Password strength meter */}
+                {/* Password strength meter — unchanged */}
                 {password.length > 0 && (
                   <div className="mt-2.5">
                     <div className="flex gap-1 mb-1.5">
@@ -466,7 +484,6 @@ const Signup = () => {
                 )}
               </div>
 
-              {/* Confirm password */}
               <div>
                 <label htmlFor="confirmPassword" className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: T.textMuted }}>
                   Confirm password
@@ -489,12 +506,8 @@ const Signup = () => {
                     style={{
                       ...inputStyle('confirmPassword'),
                       borderColor: confirmPassword.length > 0
-                        ? passwordsMatch
-                          ? 'rgba(90,158,138,0.60)'
-                          : 'rgba(176,80,70,0.50)'
-                        : fieldFocus === 'confirmPassword'
-                          ? T.inputFocus
-                          : T.inputBorder,
+                        ? passwordsMatch ? 'rgba(90,158,138,0.60)' : 'rgba(176,80,70,0.50)'
+                        : fieldFocus === 'confirmPassword' ? T.inputFocus : T.inputBorder,
                     }}
                   />
                   <button
@@ -509,7 +522,6 @@ const Signup = () => {
                     {showConfirm ? <IconEyeOff /> : <IconEye />}
                   </button>
 
-                  {/* Match indicator */}
                   {confirmPassword.length > 0 && (
                     <span
                       className="absolute right-10 top-1/2 -translate-y-1/2 text-xs font-semibold"
@@ -521,7 +533,7 @@ const Signup = () => {
                 </div>
               </div>
 
-              {/* Terms agreement */}
+              {/* Terms — unchanged */}
               <div className="flex items-start gap-2.5 pt-1">
                 <button
                   type="button"
@@ -556,18 +568,17 @@ const Signup = () => {
               {/* Submit */}
               <button
                 type="submit"
-                disabled={loading}
-                className="w-full py-3.5 rounded-xl font-semibold text-sm transition-all duration-300 focus:outline-none mt-2"
+                disabled={authLoading}
+                className="w-full py-3.5 rounded-xl font-semibold text-sm transition-all duration-300 focus:outline-none mt-2 disabled:cursor-not-allowed"
                 style={{
-                  background: loading ? T.surface2 : btnPrimary.bg,
-                  boxShadow: loading ? 'none' : btnPrimary.shadow,
-                  color: loading ? T.textMuted : btnPrimary.color,
-                  cursor: loading ? 'not-allowed' : 'pointer',
+                  background:  authLoading ? T.surface2 : btnPrimary.bg,
+                  boxShadow:   authLoading ? 'none'      : btnPrimary.shadow,
+                  color:       authLoading ? T.textMuted : btnPrimary.color,
                 }}
-                onMouseEnter={(e) => { if (!loading) (e.currentTarget as HTMLElement).style.transform = 'scale(1.02)' }}
+                onMouseEnter={(e) => { if (!authLoading) (e.currentTarget as HTMLElement).style.transform = 'scale(1.02)' }}
                 onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.transform = 'scale(1)' }}
               >
-                {loading ? (
+                {authLoading ? (
                   <span className="flex items-center justify-center gap-2">
                     <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
@@ -580,7 +591,6 @@ const Signup = () => {
             </form>
           </div>
 
-          {/* Trust line */}
           <p className="mt-5 text-center text-xs" style={{ color: T.textMuted }}>
             Secured by industry-standard encryption.{' '}
             <Link href="/privacy" className="underline underline-offset-2 focus:outline-none" style={{ color: T.textMuted }}>

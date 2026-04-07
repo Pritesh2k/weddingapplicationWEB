@@ -5,9 +5,13 @@ import React, { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useTheme } from '@/context/ThemeContext'
 import { btnPrimary, BROWN_PRIMARY, THEME } from '@/lib/theme'
+import { useRouter, useSearchParams } from 'next/navigation'   // ← replaces useNavigate for auth redirects
 import { useNavigate } from '@/context/NavigationContext'
 
-// ─── ICONS ───────────────────────────────────────────────────
+import { useAuth } from '@/context/Auth/AuthContext'
+import { getFriendlyError } from '@/components/Auth/shared'
+
+// ─── ICONS (unchanged) ───────────────────────────────────────
 const IconRings = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-5 h-5">
     <circle cx="8" cy="12" r="5" /><circle cx="16" cy="12" r="5" />
@@ -66,19 +70,24 @@ const IconArrowLeft = () => (
 
 // ─── COMPONENT ───────────────────────────────────────────────
 const Login = () => {
-  const { navigate } = useNavigate()
-
   const { darkMode, toggleTheme, T } = useTheme()
+  const { navigate }                 = useNavigate()
+  const router                       = useRouter()
+  const searchParams                 = useSearchParams()
+  const redirect                     = searchParams.get('redirect') || '/dashboard'
 
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [rememberMe, setRememberMe] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [fieldFocus, setFieldFocus] = useState<string | null>(null)
+  // ── Auth ────────────────────────────────────────────────
+  const { signInGoogle, signInEmail, loading: authLoading } = useAuth()
+
+  const [email,         setEmail]         = useState('')
+  const [password,      setPassword]      = useState('')
+  const [showPassword,  setShowPassword]  = useState(false)
+  const [rememberMe,    setRememberMe]    = useState(false)
+  const [error,         setError]         = useState('')
+  const [fieldFocus,    setFieldFocus]    = useState<string | null>(null)
   const cardRef = useRef<HTMLDivElement>(null)
 
+  // Card entrance animation (unchanged)
   useEffect(() => {
     if (!cardRef.current) return
     cardRef.current.style.opacity = '0'
@@ -93,14 +102,28 @@ const Login = () => {
     })
   }, [])
 
+  // ── Google sign-in ──────────────────────────────────────
+  const handleGoogle = async () => {
+    setError('')
+    try {
+      await signInGoogle()
+      router.push(redirect)
+    } catch (e: any) {
+      setError(getFriendlyError(e.code))
+    }
+  }
+
+  // ── Email sign-in ───────────────────────────────────────
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     if (!email || !password) { setError('Please fill in all fields.'); return }
-    setLoading(true)
-    await new Promise((r) => setTimeout(r, 1600))
-    setLoading(false)
-    navigate('/dashboard')
+    try {
+      await signInEmail(email, password)
+      router.push(redirect)
+    } catch (e: any) {
+      setError(getFriendlyError(e.code))
+    }
   }
 
   const inputStyle = (field: string) => ({
@@ -119,7 +142,7 @@ const Login = () => {
       className="min-h-screen font-sans antialiased flex flex-col"
       style={{ backgroundColor: T.bg, color: T.textPrimary }}
     >
-      {/* ── Background glow ──────────────────────────────── */}
+      {/* Background glow — unchanged */}
       <div className="fixed inset-0 pointer-events-none" aria-hidden="true">
         <div className="absolute inset-0" style={{ background: T.heroBg }} />
         <div
@@ -132,7 +155,7 @@ const Login = () => {
         />
       </div>
 
-      {/* ── Header — clean, minimal ───────────────────────── */}
+      {/* Header — unchanged */}
       <header
         className="relative z-10 flex items-center justify-between px-6 lg:px-10 h-16"
         style={{
@@ -141,7 +164,6 @@ const Login = () => {
           borderBottom: `1px solid ${T.borderSubtle}`,
         }}
       >
-        {/* Home link */}
         <Link
           href="/"
           className="flex items-center gap-2 text-sm font-medium transition-colors duration-200 focus:outline-none group"
@@ -155,7 +177,6 @@ const Login = () => {
           <span className="hidden sm:inline">Home</span>
         </Link>
 
-        {/* Logo — centred */}
         <Link href="/" className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2 focus:outline-none">
           <div
             className="w-7 h-7 rounded-full flex items-center justify-center"
@@ -166,7 +187,6 @@ const Login = () => {
           <span className="font-semibold tracking-tight text-lg" style={{ color: T.textPrimary }}>Vow</span>
         </Link>
 
-        {/* Theme toggle */}
         <button
           onClick={toggleTheme}
           className="p-2 rounded-full transition-all duration-300 hover:scale-110 focus:outline-none"
@@ -178,21 +198,17 @@ const Login = () => {
         </button>
       </header>
 
-      {/* ── Main ─────────────────────────────────────────── */}
+      {/* Main */}
       <main className="relative z-10 flex-1 flex items-center justify-center px-4 py-12">
         <div ref={cardRef} className="w-full max-w-md">
 
-          {/* ── Tab switcher — above card, feels native ───── */}
+          {/* Tab switcher — unchanged */}
           <div
             className="flex items-center rounded-2xl p-1 mb-3 gap-1"
-            style={{
-              backgroundColor: T.surface,
-              border: `1px solid ${T.borderBrown}`,
-            }}
+            style={{ backgroundColor: T.surface, border: `1px solid ${T.borderBrown}` }}
             role="tablist"
             aria-label="Authentication mode"
           >
-            {/* Sign in tab — ACTIVE */}
             <Link
               href="/login"
               role="tab"
@@ -202,7 +218,6 @@ const Login = () => {
             >
               Sign in
             </Link>
-            {/* Sign up tab — INACTIVE */}
             <Link
               href="/signup"
               role="tab"
@@ -216,7 +231,7 @@ const Login = () => {
             </Link>
           </div>
 
-          {/* ── Card ─────────────────────────────────────── */}
+          {/* Card */}
           <div
             className="rounded-2xl p-8 md:p-10"
             style={{
@@ -227,7 +242,6 @@ const Login = () => {
                 : '0 12px 40px rgba(139,107,71,0.10), 0 2px 8px rgba(0,0,0,0.05)',
             }}
           >
-            {/* Heading */}
             <div className="mb-8">
               <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: T.accentText }}>
                 Welcome back
@@ -240,16 +254,25 @@ const Login = () => {
               </p>
             </div>
 
-            {/* Google SSO */}
+            {/* ── Google button — now wired ─────────────── */}
             <button
               type="button"
-              className="w-full flex items-center justify-center gap-3 py-3 rounded-xl text-sm font-semibold transition-all duration-200 hover:scale-[1.01] focus:outline-none mb-6"
-              style={{ backgroundColor: T.surface2, border: `1px solid ${T.borderBrown}`, color: T.textPrimary }}
-              onMouseEnter={(e) => (e.currentTarget.style.borderColor = T.accentText)}
+              onClick={handleGoogle}
+              disabled={authLoading}
+              className="w-full flex items-center justify-center gap-3 py-3 rounded-xl
+                         text-sm font-semibold transition-all duration-200
+                         hover:scale-[1.01] focus:outline-none mb-6
+                         disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{
+                backgroundColor: T.surface2,
+                border: `1px solid ${T.borderBrown}`,
+                color: T.textPrimary,
+              }}
+              onMouseEnter={(e) => { if (!authLoading) (e.currentTarget.style.borderColor = T.accentText) }}
               onMouseLeave={(e) => (e.currentTarget.style.borderColor = T.borderBrown)}
             >
               <IconGoogle />
-              Continue with Google
+              {authLoading ? 'Signing in…' : 'Continue with Google'}
             </button>
 
             {/* Divider */}
@@ -263,17 +286,20 @@ const Login = () => {
             {error && (
               <div
                 className="flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm mb-5"
-                style={{ background: 'rgba(176,80,70,0.12)', border: '1px solid rgba(176,80,70,0.28)', color: '#D4847A' }}
+                style={{
+                  background: 'rgba(176,80,70,0.12)',
+                  border: '1px solid rgba(176,80,70,0.28)',
+                  color: '#D4847A',
+                }}
                 role="alert"
               >
                 <span>⚠</span> {error}
               </div>
             )}
 
-            {/* Form */}
+            {/* Form — unchanged except onSubmit */}
             <form onSubmit={handleSubmit} noValidate className="space-y-4">
 
-              {/* Email */}
               <div>
                 <label htmlFor="email" className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: T.textMuted }}>
                   Email address
@@ -298,7 +324,6 @@ const Login = () => {
                 </div>
               </div>
 
-              {/* Password */}
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <label htmlFor="password" className="block text-xs font-semibold uppercase tracking-wider" style={{ color: T.textMuted }}>
@@ -345,7 +370,7 @@ const Login = () => {
                 </div>
               </div>
 
-              {/* Remember me */}
+              {/* Remember me — unchanged */}
               <div className="flex items-center gap-2.5 pt-1">
                 <button
                   type="button"
@@ -371,18 +396,17 @@ const Login = () => {
               {/* Submit */}
               <button
                 type="submit"
-                disabled={loading}
-                className="w-full py-3.5 rounded-xl font-semibold text-sm transition-all duration-300 focus:outline-none mt-2"
+                disabled={authLoading}
+                className="w-full py-3.5 rounded-xl font-semibold text-sm transition-all duration-300 focus:outline-none mt-2 disabled:cursor-not-allowed"
                 style={{
-                  background: loading ? T.surface2 : btnPrimary.bg,
-                  boxShadow: loading ? 'none' : btnPrimary.shadow,
-                  color: loading ? T.textMuted : btnPrimary.color,
-                  cursor: loading ? 'not-allowed' : 'pointer',
+                  background:  authLoading ? T.surface2 : btnPrimary.bg,
+                  boxShadow:   authLoading ? 'none'      : btnPrimary.shadow,
+                  color:       authLoading ? T.textMuted : btnPrimary.color,
                 }}
-                onMouseEnter={(e) => { if (!loading) (e.currentTarget as HTMLElement).style.transform = 'scale(1.02)' }}
+                onMouseEnter={(e) => { if (!authLoading) (e.currentTarget as HTMLElement).style.transform = 'scale(1.02)' }}
                 onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.transform = 'scale(1)' }}
               >
-                {loading ? (
+                {authLoading ? (
                   <span className="flex items-center justify-center gap-2">
                     <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
@@ -395,7 +419,6 @@ const Login = () => {
             </form>
           </div>
 
-          {/* Trust line */}
           <p className="mt-5 text-center text-xs" style={{ color: T.textMuted }}>
             Secured by industry-standard encryption.{' '}
             <Link href="/privacy" className="underline underline-offset-2 focus:outline-none" style={{ color: T.textMuted }}>
