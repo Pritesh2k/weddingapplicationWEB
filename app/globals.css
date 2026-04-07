@@ -13,6 +13,7 @@
 html {
   background-color: #F7F3ED;
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
 html.dark {

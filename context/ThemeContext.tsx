@@ -8,33 +8,41 @@ interface ThemeContextValue {
   darkMode: boolean
   toggleTheme: () => void
   T: ThemeMode
+  mounted: boolean
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null)
 
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
 
-  // ── Single source of truth — read once from localStorage ──
-  const [darkMode, setDarkMode] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return true
+  // ── Always false on server — prevents SSR/client mismatch ──
+  const [darkMode, setDarkMode] = useState(false)
+  const [mounted, setMounted]   = useState(false)
+
+  // ── After mount, read real preference from localStorage ───
+  useEffect(() => {
     const stored = localStorage.getItem('vow-theme')
-    if (stored) return stored === 'dark'
-    return window.matchMedia('(prefers-color-scheme: dark)').matches
-  })
+    if (stored) {
+      setDarkMode(stored === 'dark')
+    } else {
+      setDarkMode(window.matchMedia('(prefers-color-scheme: dark)').matches)
+    }
+    setMounted(true)
+  }, [])
 
   // ── Sync html class + bg whenever darkMode changes ────────
   useEffect(() => {
+    if (!mounted) return
     document.documentElement.classList.toggle('dark', darkMode)
     document.documentElement.style.backgroundColor = darkMode ? '#1E1C1A' : '#F7F3ED'
     localStorage.setItem('vow-theme', darkMode ? 'dark' : 'light')
-  }, [darkMode])
+  }, [darkMode, mounted])
 
   const toggleTheme = () => setDarkMode((prev) => !prev)
-
   const T = getTheme(darkMode)
 
   return (
-    <ThemeContext.Provider value={{ darkMode, toggleTheme, T }}>
+    <ThemeContext.Provider value={{ darkMode, toggleTheme, T, mounted }}>
       {children}
     </ThemeContext.Provider>
   )

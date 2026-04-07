@@ -12,10 +12,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head />
+      <head suppressHydrationWarning />
       <body suppressHydrationWarning>
 
-        {/* ── Blocking script: runs before first paint, zero flash ── */}
         <script
           suppressHydrationWarning
           dangerouslySetInnerHTML={{
@@ -34,6 +33,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
 
         <ThemeProvider>
+          {/*
+            ✅ PageTransition must NOT wrap the Navbar.
+            Any transform/opacity animation on this wrapper breaks position:fixed.
+            The Navbar lives in {children} (page.tsx) so it escapes PageTransition entirely
+            by being rendered at the layout level instead.
+          */}
           <PageTransition>
             {children}
           </PageTransition>
