@@ -23,7 +23,7 @@ export const FOOTER_NAV_ITEMS = [
 // ─── LOGO STRIP ───────────────────────────────────────────────
 export const LOGO_STRIP_ITEMS = [
   'Single-Day Weddings', 'Multi-Day Celebrations', 'Destination Weddings',
-  'Hindu Ceremonies',    'Christian Ceremonies',   'Muslim Nikkah & Walima',
+  'Hindu Ceremonies',    'Christian Ceremonies',   'Nikkah & Walima',
   'Civil Ceremonies',    'Blended-Faith Programs', 'Multi-Venue Events',
 ]
 
@@ -88,7 +88,7 @@ export const TRADITIONS: Tradition[] = [
 export const TRADITION_FEATURES = [
   { title: 'Faith-agnostic by design', desc: 'No single tradition is hardcoded. Select one or many cultural modules during programme setup.'           },
   { title: 'Ritual item tracking',     desc: 'Every ceremony element — items, witnesses, officiants, readings, music cues — is tracked and assigned.' },
-  { title: 'Multi-stream support',     desc: 'Running a Nikah and a Church ceremony in the same programme? Separate ritual streams, one system.'       },
+  { title: 'Multi-stream support',     desc: 'Running a Hindu and a Church ceremony in the same programme? Separate ritual streams, one system.'       },
   { title: 'Guest scoping per event',  desc: 'Different guest sets for mehendi vs reception. Invitations, RSVPs, and seating stay separate.'           },
 ]
 

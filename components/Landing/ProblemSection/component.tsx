@@ -69,37 +69,64 @@ const ProblemSection = ({ problemRef, cards }: ProblemSectionProps) => {
         </div>
 
         {/* Right — comparison cards */}
-        <div className="grid grid-cols-1 gap-4">
+        <div className="grid grid-cols-1 gap-3">
           {cards.map((item) => (
             <div
               key={item.label}
-              className="problem-reveal p-5 rounded-xl"
+              className="problem-reveal group relative overflow-hidden rounded-2xl p-5
+                 transition-all duration-300 hover:scale-[1.01]"
               style={{
                 backgroundColor: T.surface,
-                borderTopWidth: '1px',
-                borderRightWidth: '1px',
-                borderBottomWidth: '1px',
-                borderLeftWidth: '2px',
-                borderStyle: 'solid',
-                borderTopColor: T.borderSubtle,
-                borderRightColor: T.borderSubtle,
-                borderBottomColor: T.borderSubtle,
-                borderLeftColor: item.accentColor,
+                border: `1px solid ${T.borderSubtle}`,
+                boxShadow: `0 1px 3px rgba(0,0,0,0.04)`,
               }}
             >
-              <p className="text-xs font-semibold uppercase tracking-wider mb-2"
-                style={{ color: T.textMuted }}>
+              {/* Left accent bar */}
+              <div
+                className="absolute left-0 top-4 bottom-4 w-0.5 rounded-full"
+                style={{ backgroundColor: item.accentColor }}
+              />
+
+              {/* Label */}
+              <p
+                className="text-[10px] font-bold uppercase tracking-widest mb-3 pl-3"
+                style={{ color: item.accentColor }}
+              >
                 {item.label}
               </p>
-              <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 items-start sm:items-center">
-                <span className="text-sm flex-1 line-through" style={{ color: T.textMuted }}>
+
+              {/* Before row */}
+              <div
+                className="flex items-start gap-2.5 mb-2 pl-3 py-2 rounded-lg"
+                style={{ backgroundColor: `${T.borderSubtle}60` }}
+              >
+                <span
+                  className="mt-0.5 shrink-0 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold"
+                  style={{ backgroundColor: 'rgba(180,60,60,0.12)', color: 'rgba(180,60,60,0.70)' }}
+                >
+                  ✕
+                </span>
+                <span className="text-sm leading-snug" style={{ color: T.textMuted }}>
                   {item.before}
                 </span>
-                <span className="text-xs font-bold shrink-0" style={{ color: T.accentText }}>→</span>
-                <span className="text-sm font-medium flex-1" style={{ color: T.textPrimary }}>
+              </div>
+
+              {/* After row */}
+              <div
+                className="flex items-start gap-2.5 pl-3 py-2 rounded-lg"
+                style={{ backgroundColor: `${item.accentColor}12` }}
+              >
+                <span
+                  className="mt-0.5 shrink-0 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold"
+                  style={{ backgroundColor: `${item.accentColor}25`, color: item.accentColor }}
+                >
+                  ✓
+                </span>
+                <span className="text-sm font-medium leading-snug" style={{ color: T.textPrimary }}>
                   {item.after}
                 </span>
               </div>
+
             </div>
           ))}
         </div>

@@ -162,17 +162,63 @@ const TraditionSection = ({ traditionRef, traditions, traditionFeatures }: Tradi
           </div>
 
           {/* Right — feature cards */}
-          <div className="space-y-4 tradition-reveal">
-            {traditionFeatures.map((item) => (
+          <div className="space-y-3 tradition-reveal">
+            {traditionFeatures.map((item, index) => (
               <div
                 key={item.title}
-                className="p-5 rounded-xl transition-colors duration-300"
-                style={{ backgroundColor: T.surface, border: `1px solid ${T.borderSubtle}` }}
-                onMouseEnter={(e) => (e.currentTarget.style.borderColor = T.borderBrown)}
-                onMouseLeave={(e) => (e.currentTarget.style.borderColor = T.borderSubtle)}
+                className="group relative overflow-hidden rounded-2xl p-5
+                 transition-all duration-300 hover:scale-[1.01]"
+                style={{
+                  backgroundColor: T.surface,
+                  border: `1px solid ${T.borderSubtle}`,
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = T.borderBrown
+                  e.currentTarget.style.boxShadow = '0 4px 20px rgba(139,107,71,0.08)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = T.borderSubtle
+                  e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.04)'
+                }}
               >
-                <h4 className="font-semibold mb-1.5 text-sm" style={{ color: T.textPrimary }}>{item.title}</h4>
-                <p className="text-sm" style={{ color: T.textMuted }}>{item.desc}</p>
+                {/* Subtle top-edge accent line that appears on hover via opacity */}
+                <div
+                  className="absolute top-0 left-6 right-6 h-px rounded-full
+                   opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  style={{ background: `linear-gradient(90deg, transparent, ${T.accentText}55, transparent)` }}
+                />
+
+                <div className="flex items-start gap-4">
+                  {/* Index badge */}
+                  <div
+                    className="shrink-0 w-8 h-8 rounded-xl flex items-center justify-center
+                     text-xs font-bold transition-colors duration-300"
+                    style={{
+                      backgroundColor: `rgba(139,107,71,0.10)`,
+                      color: T.accentText,
+                      border: `1px solid rgba(139,107,71,0.18)`,
+                    }}
+                  >
+                    {String(index + 1).padStart(2, '0')}
+                  </div>
+
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    <h4
+                      className="font-semibold text-sm mb-1 leading-snug"
+                      style={{ color: T.textPrimary }}
+                    >
+                      {item.title}
+                    </h4>
+                    <p
+                      className="text-sm leading-relaxed"
+                      style={{ color: T.textMuted }}
+                    >
+                      {item.desc}
+                    </p>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
