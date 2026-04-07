@@ -17,7 +17,6 @@ export const FOOTER_NAV_ITEMS = [
   { label: 'Live Mode',    id: 'command-centre' },
   { label: 'Stakeholders', id: 'stakeholders'   },
   { label: 'Traditions',   id: 'traditions'     },
-  { label: 'Get Started',  id: 'waitlist'       },
 ]
 
 // ─── LOGO STRIP ───────────────────────────────────────────────
