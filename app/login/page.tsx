@@ -5,7 +5,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useTheme } from '@/context/ThemeContext'
 import { btnPrimary, BROWN_PRIMARY, THEME } from '@/lib/theme'
-import { useRouter } from 'next/navigation'
+import { useNavigate } from '@/context/NavigationContext'
 
 // ─── ICONS ───────────────────────────────────────────────────
 const IconRings = () => (
@@ -66,7 +66,7 @@ const IconArrowLeft = () => (
 
 // ─── COMPONENT ───────────────────────────────────────────────
 const Login = () => {
-  const router = useRouter()
+  const { navigate } = useNavigate()
 
   const { darkMode, toggleTheme, T } = useTheme()
 
@@ -100,7 +100,7 @@ const Login = () => {
     setLoading(true)
     await new Promise((r) => setTimeout(r, 1600))
     setLoading(false)
-    router.push('/dashboard')
+    navigate('/dashboard')
   }
 
   const inputStyle = (field: string) => ({

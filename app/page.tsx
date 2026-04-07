@@ -64,6 +64,7 @@ const Page = () => {
 
       <div
         suppressHydrationWarning
+        data-page-wrapper
         className="min-h-screen font-sans antialiased transition-colors duration-500"
         style={{ backgroundColor: T.bg, color: T.textPrimary }}
       >

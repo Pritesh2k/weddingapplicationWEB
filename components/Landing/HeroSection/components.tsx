@@ -8,13 +8,13 @@ import Link from 'next/link'
 
 // ─── TYPES ───────────────────────────────────────────────────
 interface HeroSectionProps {
-  scrollTo:        (id: string) => void
-  heroRef:         RefObject<HTMLElement | null>
+  scrollTo: (id: string) => void
+  heroRef: RefObject<HTMLElement | null>
   heroHeadlineRef: RefObject<HTMLHeadingElement | null>
-  heroSubRef:      RefObject<HTMLParagraphElement | null>
-  heroCTARef:      RefObject<HTMLDivElement | null>
-  heroScrollRef:   RefObject<HTMLDivElement | null>
-  IconArrow:       () => React.ReactElement
+  heroSubRef: RefObject<HTMLParagraphElement | null>
+  heroCTARef: RefObject<HTMLDivElement | null>
+  heroScrollRef: RefObject<HTMLDivElement | null>
+  IconArrow: () => React.ReactElement
   IconChevronDown: () => React.ReactElement
 }
 
@@ -40,13 +40,13 @@ const HeroSection = ({
       gsap.timeline({ delay: 0.2 })
         .fromTo(heroHeadlineRef.current,
           { y: 60, opacity: 0 },
-          { y: 0,  opacity: 1, duration: 1.1, ease: 'power4.out' })
+          { y: 0, opacity: 1, duration: 1.1, ease: 'power4.out' })
         .fromTo(heroSubRef.current,
           { y: 30, opacity: 0 },
-          { y: 0,  opacity: 1, duration: 0.9, ease: 'power3.out' }, '-=0.7')
+          { y: 0, opacity: 1, duration: 0.9, ease: 'power3.out' }, '-=0.7')
         .fromTo(heroCTARef.current,
           { y: 20, opacity: 0 },
-          { y: 0,  opacity: 1, duration: 0.7, ease: 'power2.out' }, '-=0.5')
+          { y: 0, opacity: 1, duration: 0.7, ease: 'power2.out' }, '-=0.5')
         .fromTo(heroScrollRef.current,
           { opacity: 0 },
           { opacity: 1, duration: 0.6 }, '-=0.3')
@@ -58,9 +58,9 @@ const HeroSection = ({
           ease: 'none',
           scrollTrigger: {
             trigger: heroRef.current,
-            start:   'top top',
-            end:     'bottom top',
-            scrub:   true,
+            start: 'top top',
+            end: 'bottom top',
+            scrub: true,
           },
         })
       }
@@ -68,11 +68,11 @@ const HeroSection = ({
       // Scroll indicator bounce
       if (heroScrollRef.current) {
         gsap.to(heroScrollRef.current.querySelector('.scroll-arrow'), {
-          y:        8,
-          repeat:   -1,
-          yoyo:     true,
+          y: 8,
+          repeat: -1,
+          yoyo: true,
           duration: 0.9,
-          ease:     'sine.inOut',
+          ease: 'sine.inOut',
         })
       }
     })
@@ -88,7 +88,6 @@ const HeroSection = ({
     >
       {/* Background */}
       <div className="hero-bg absolute inset-0 pointer-events-none select-none" aria-hidden="true">
-        <div className="absolute inset-0" style={{ background: T.heroBg }} />
         <div
           className="absolute top-0 left-1/2 -translate-x-1/2 w-225 h-125 rounded-full blur-3xl"
           style={{ background: T.heroGlow }}
@@ -100,9 +99,9 @@ const HeroSection = ({
         <div
           className="absolute inset-0"
           style={{
-            opacity:         darkMode ? 0.025 : 0.04,
+            opacity: darkMode ? 0.025 : 0.04,
             backgroundImage: `linear-gradient(${T.heroGrid} 1px, transparent 1px), linear-gradient(90deg, ${T.heroGrid} 1px, transparent 1px)`,
-            backgroundSize:  '80px 80px',
+            backgroundSize: '80px 80px',
           }}
         />
         <div className="absolute inset-0" style={{ background: T.heroVignette }} />
@@ -116,9 +115,9 @@ const HeroSection = ({
           className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs
                      font-medium tracking-widest uppercase mb-8 backdrop-blur-sm"
           style={{
-            border:     '1px solid rgba(139,107,71,0.35)',
+            border: '1px solid rgba(139,107,71,0.35)',
             background: 'rgba(139,107,71,0.08)',
-            color:      T.accentText,
+            color: T.accentText,
           }}
         >
           <span className="w-1.5 h-1.5 rounded-full animate-pulse"

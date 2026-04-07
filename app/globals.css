@@ -12,7 +12,6 @@
 
 html {
   background-color: #F7F3ED;
-  scroll-behavior: smooth;
   overflow-x: hidden;
 }
 
@@ -33,4 +32,8 @@ body {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+#hero {
+  background-color: inherit;
 }

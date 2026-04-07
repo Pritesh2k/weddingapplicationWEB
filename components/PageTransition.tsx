@@ -1,57 +1,97 @@
 // components/PageTransition.tsx
 'use client'
 
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
+import { useTheme } from '@/context/ThemeContext'
+import { useNavigate } from '@/context/NavigationContext'
 
 interface Props { children: React.ReactNode }
 
-export default function PageTransition({ children }: Props) {
-  const pathname              = usePathname()
-  const [display, setDisplay] = useState(children)
-  const [phase, setPhase]     = useState<'idle' | 'out' | 'in'>('idle')
-  const pendingChildren       = useRef(children)
-  const prevPathname          = useRef(pathname)
+const COVER_MS   = 275
+const HOLD_MS    = 50
+const UNCOVER_MS = 200
 
+export default function PageTransition({ children }: Props) {
+  const pathname          = usePathname()
+  const router            = useRouter()
+  const { darkMode }      = useTheme()
+  const { registerCover } = useNavigate()
+
+  const [display, setDisplay] = useState(children)
+  const [phase, setPhase]     = useState<'idle' | 'covering' | 'covered' | 'uncovering'>('idle')
+
+  const prevPathname    = useRef(pathname)
+  const isTransitioning = useRef(false)
+
+  // ── Cover + push — used by both click interceptor and programmatic nav ──
+  const coverAndPush = useRef((href: string) => {
+    if (isTransitioning.current) return
+    isTransitioning.current = true
+    setPhase('covering')
+    setTimeout(() => router.push(href), COVER_MS)
+  })
+
+  // ── Register cover function so NavigationContext can call it ──
   useEffect(() => {
-    // Same page — no transition needed (e.g. hash change, searchParams)
+    registerCover((href) => coverAndPush.current(href))
+  }, [registerCover])
+
+  // ── Intercept <a> clicks ──────────────────────────────────
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      const anchor = (e.target as HTMLElement).closest('a')
+      if (!anchor) return
+      const href = anchor.getAttribute('href')
+      if (!href) return
+      const isInternal = !href.startsWith('http') && !href.startsWith('//') && !href.startsWith('#')
+      const isSamePage = href === window.location.pathname
+      if (!isInternal || isSamePage) return
+
+      e.preventDefault()
+      coverAndPush.current(href)
+    }
+
+    document.addEventListener('click', handleClick, true)
+    return () => document.removeEventListener('click', handleClick, true)
+  }, [])
+
+  // ── Uncover when new page children arrive ─────────────────
+  useEffect(() => {
     if (pathname === prevPathname.current) {
       setDisplay(children)
       return
     }
 
-    prevPathname.current  = pathname
-    pendingChildren.current = children
+    prevPathname.current = pathname
+    setDisplay(children)
+    setPhase('covered')
 
-    // Phase 1 — fade + slide out
-    setPhase('out')
-
-    const outTimer = setTimeout(() => {
-      // Swap content at the midpoint (page is invisible)
-      setDisplay(pendingChildren.current)
-
-      // Phase 2 — fade + slide in
-      setPhase('in')
-
-      const inTimer = setTimeout(() => {
+    setTimeout(() => {
+      setPhase('uncovering')
+      setTimeout(() => {
         setPhase('idle')
-      }, 400)
-
-      return () => clearTimeout(inTimer)
-    }, 300)
-
-    return () => clearTimeout(outTimer)
+        isTransitioning.current = false
+      }, UNCOVER_MS)
+    }, HOLD_MS)
   }, [pathname, children])
 
-  const styles: Record<string, React.CSSProperties> = {
-    idle: { opacity: 1,   transform: 'translateY(0px)',  transition: 'none' },
-    out:  { opacity: 0,   transform: 'translateY(-8px)', transition: 'opacity 300ms cubic-bezier(0.4,0,0.2,1), transform 300ms cubic-bezier(0.4,0,0.2,1)' },
-    in:   { opacity: 1,   transform: 'translateY(0px)',  transition: 'opacity 400ms cubic-bezier(0.0,0,0.2,1), transform 400ms cubic-bezier(0.0,0,0.2,1)' },
+  const maskStyle: React.CSSProperties = {
+    position:        'fixed',
+    inset:           0,
+    zIndex:          99998,
+    pointerEvents:   phase === 'idle' ? 'none' : 'all',
+    backgroundColor: darkMode ? '#1E1C1A' : '#F7F3ED',
+    ...(phase === 'idle'      && { clipPath: 'inset(0 100% 0 0)', transition: 'none' }),
+    ...(phase === 'covering'  && { clipPath: 'inset(0 0% 0 0)',   transition: `clip-path ${COVER_MS}ms cubic-bezier(0.76,0,0.24,1)` }),
+    ...(phase === 'covered'   && { clipPath: 'inset(0 0% 0 0)',   transition: 'none' }),
+    ...(phase === 'uncovering'&& { clipPath: 'inset(0 0% 0 100%)',transition: `clip-path ${UNCOVER_MS}ms cubic-bezier(0.76,0,0.24,1)` }),
   }
 
   return (
-    <div style={styles[phase]}>
+    <>
+      <div style={maskStyle} aria-hidden="true" />
       {display}
-    </div>
+    </>
   )
 }
