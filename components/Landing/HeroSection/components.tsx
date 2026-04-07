@@ -133,7 +133,7 @@ const HeroSection = ({
         >
           <span className="block" style={{ color: T.textPrimary }}>Plan the day.</span>
           <span
-            className="block bg-clip-text text-transparent"
+            className="bg-clip-text text-transparent"
             style={{ backgroundImage: `linear-gradient(90deg, ${BROWN_PRIMARY} 0%, ${BROWN_LIGHT} 40%, ${BROWN_PALE} 70%, #D4AA6E 100%)` }}
           >
             Run the day.

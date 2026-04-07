@@ -26,11 +26,11 @@ const GetStartedSection = ({ sectionRef }: GetStartedSectionProps) => {
         els,
         { opacity: 0, y: 30 },
         {
-          opacity:  1,
-          y:        0,
+          opacity: 1,
+          y: 0,
           duration: 0.7,
-          ease:     'power3.out',
-          stagger:  0.12,
+          ease: 'power3.out',
+          stagger: 0.12,
           scrollTrigger: { trigger: section, start: 'top 75%' },
         }
       )
@@ -65,9 +65,9 @@ const GetStartedSection = ({ sectionRef }: GetStartedSectionProps) => {
           className="gs-reveal inline-flex items-center gap-2 px-4 py-1.5 rounded-full
                      text-xs font-medium tracking-widest uppercase mb-8 backdrop-blur-sm"
           style={{
-            border:     '1px solid rgba(139,107,71,0.35)',
+            border: '1px solid rgba(139,107,71,0.35)',
             background: 'rgba(139,107,71,0.08)',
-            color:      T.accentText,
+            color: T.accentText,
           }}
         >
           <span className="w-1.5 h-1.5 rounded-full animate-pulse"
@@ -78,8 +78,10 @@ const GetStartedSection = ({ sectionRef }: GetStartedSectionProps) => {
         {/* Headline */}
         <h2
           className="gs-reveal text-4xl md:text-5xl lg:text-6xl font-bold tracking-tighter
-                     leading-[0.95] mb-6 bg-clip-text text-transparent"
-          style={{ backgroundImage: `linear-gradient(135deg, ${BROWN_PRIMARY} 0%, ${BROWN_LIGHT} 50%, ${BROWN_PALE} 100%)` }}
+             leading-[1.05] mb-6 bg-clip-text text-transparent pb-2"
+          style={{
+            backgroundImage: `linear-gradient(135deg, ${BROWN_PRIMARY} 0%, ${BROWN_LIGHT} 50%, ${BROWN_PALE} 100%)`,
+          }}
         >
           Your wedding deserves a proper operating system.
         </h2>
@@ -113,8 +115,8 @@ const GetStartedSection = ({ sectionRef }: GetStartedSectionProps) => {
                        text-base hover:scale-[1.03] transition-all duration-300 focus:outline-none"
             style={{
               backgroundColor: T.surface,
-              border:          `1px solid ${T.borderBrown}`,
-              color:           T.textSecondary,
+              border: `1px solid ${T.borderBrown}`,
+              color: T.textSecondary,
             }}
           >
             Book a Demo
