@@ -5,9 +5,10 @@ import React, { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useTheme } from '@/context/ThemeContext'
 import { btnPrimary, BROWN_PRIMARY, THEME } from '@/lib/theme'
-import { useRouter } from 'next/navigation'                    // ← added
+import { useRouter } from 'next/navigation'
+import { useNavigate } from '@/context/NavigationContext'
 
-import { getFriendlyError } from '@/components/Auth/shared'   // ← GoogleMark/Divider removed (unused)
+import { getFriendlyError } from '@/components/Auth/shared'
 import { useAuth } from '@/context/Auth/AuthContext'
 
 // ─── ICONS (all unchanged) ────────────────────────────────────
@@ -87,9 +88,9 @@ const getPasswordStrength = (pw: string): { score: number; label: string; color:
   if (/[0-9]/.test(pw)) score++
   if (/[^A-Za-z0-9]/.test(pw)) score++
   const map = [
-    { score: 1, label: 'Weak',   color: '#E05A4A' },
-    { score: 2, label: 'Fair',   color: '#D4AA66' },
-    { score: 3, label: 'Good',   color: '#7ABDB0' },
+    { score: 1, label: 'Weak', color: '#E05A4A' },
+    { score: 2, label: 'Fair', color: '#D4AA66' },
+    { score: 3, label: 'Good', color: '#7ABDB0' },
     { score: 4, label: 'Strong', color: '#5A9E8A' },
   ]
   return map[score - 1] ?? { score: 0, label: '', color: 'transparent' }
@@ -98,24 +99,24 @@ const getPasswordStrength = (pw: string): { score: number; label: string; color:
 // ─── COMPONENT ───────────────────────────────────────────────
 const Signup = () => {
   const { darkMode, toggleTheme, T } = useTheme()
-  const router                       = useRouter()                        // ← added
+  const router = useRouter() 
 
   // ── Auth ────────────────────────────────────────────────────
-  const { signInGoogle, signUpEmail, loading: authLoading } = useAuth()  // ← added
+  const { signInGoogle, signUpEmail, loading: authLoading } = useAuth()
+  const { navigate } = useNavigate()
 
-  const [fullName,         setFullName]         = useState('')
-  const [email,            setEmail]            = useState('')
-  const [password,         setPassword]         = useState('')
-  const [confirmPassword,  setConfirmPassword]  = useState('')
-  const [showPassword,     setShowPassword]     = useState(false)
-  const [showConfirm,      setShowConfirm]      = useState(false)
-  const [agreedToTerms,    setAgreedToTerms]    = useState(false)
-  const [error,            setError]            = useState('')
-  const [fieldFocus,       setFieldFocus]       = useState<string | null>(null)
-  const [submitted,        setSubmitted]        = useState(false)
+  const [fullName, setFullName] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
+  const [agreedToTerms, setAgreedToTerms] = useState(false)
+  const [error, setError] = useState('')
+  const [fieldFocus, setFieldFocus] = useState<string | null>(null)
   const cardRef = useRef<HTMLDivElement>(null)
 
-  const strength       = getPasswordStrength(password)
+  const strength = getPasswordStrength(password)
   const passwordsMatch = confirmPassword.length > 0 && password === confirmPassword
 
   useEffect(() => {
@@ -137,7 +138,7 @@ const Signup = () => {
     setError('')
     try {
       await signInGoogle()
-      router.push('/dashboard')
+      navigate('/dashboard')
     } catch (e: any) {
       setError(getFriendlyError(e.code))
     }
@@ -148,12 +149,12 @@ const Signup = () => {
     e.preventDefault()
     setError('')
     if (!fullName || !email || !password || !confirmPassword) { setError('Please fill in all fields.'); return }
-    if (password !== confirmPassword)  { setError('Passwords do not match.'); return }
-    if (strength.score < 2)            { setError('Please choose a stronger password.'); return }
-    if (!agreedToTerms)                { setError('Please agree to the Terms of Service to continue.'); return }
+    if (password !== confirmPassword) { setError('Passwords do not match.'); return }
+    if (strength.score < 2) { setError('Please choose a stronger password.'); return }
+    if (!agreedToTerms) { setError('Please agree to the Terms of Service to continue.'); return }
     try {
-      await signUpEmail(email, password, fullName)   // ← real call
-      setSubmitted(true)                              // show success screen (no redirect — email verify flow)
+      await signUpEmail(email, password, fullName)
+      navigate('/dashboard')
     } catch (e: any) {
       setError(getFriendlyError(e.code))
     }
@@ -171,51 +172,6 @@ const Signup = () => {
       ? `0 0 0 3px ${darkMode ? 'rgba(160,126,84,0.12)' : 'rgba(139,107,71,0.10)'}`
       : 'none',
   })
-
-  // ── Success state (unchanged) ───────────────────────────────
-  if (submitted) {
-    return (
-      <div
-        className="min-h-screen font-sans antialiased flex flex-col items-center justify-center px-4"
-        style={{ backgroundColor: T.bg, color: T.textPrimary }}
-      >
-        <div className="fixed inset-0 pointer-events-none" aria-hidden="true">
-          <div className="absolute inset-0" style={{ background: T.heroBg }} />
-        </div>
-        <div
-          className="relative z-10 w-full max-w-md rounded-2xl p-10 text-center"
-          style={{
-            backgroundColor: T.surface,
-            border: `1px solid ${T.borderBrown}`,
-            boxShadow: darkMode ? '0 24px 64px rgba(0,0,0,0.45)' : '0 12px 40px rgba(139,107,71,0.10)',
-          }}
-        >
-          <div
-            className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6"
-            style={{ background: 'rgba(90,158,138,0.15)', border: '1px solid rgba(90,158,138,0.35)' }}
-          >
-            <IconCheck />
-          </div>
-          <p className="text-xs font-semibold tracking-widest uppercase mb-2" style={{ color: T.accentText }}>
-            Account created
-          </p>
-          <h1 className="text-2xl font-bold tracking-tight mb-3" style={{ color: T.textPrimary }}>
-            Welcome to Vow
-          </h1>
-          <p className="text-sm leading-relaxed mb-8" style={{ color: T.textMuted }}>
-            Your account is ready. Start building your wedding programme from your dashboard.
-          </p>
-          <Link
-            href="/login"
-            className="block w-full py-3.5 rounded-xl font-semibold text-sm text-center transition-all duration-300 hover:scale-[1.02] focus:outline-none"
-            style={{ background: btnPrimary.bg, boxShadow: btnPrimary.shadow, color: btnPrimary.color }}
-          >
-            Sign in to your account
-          </Link>
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div
@@ -571,9 +527,9 @@ const Signup = () => {
                 disabled={authLoading}
                 className="w-full py-3.5 rounded-xl font-semibold text-sm transition-all duration-300 focus:outline-none mt-2 disabled:cursor-not-allowed"
                 style={{
-                  background:  authLoading ? T.surface2 : btnPrimary.bg,
-                  boxShadow:   authLoading ? 'none'      : btnPrimary.shadow,
-                  color:       authLoading ? T.textMuted : btnPrimary.color,
+                  background: authLoading ? T.surface2 : btnPrimary.bg,
+                  boxShadow: authLoading ? 'none' : btnPrimary.shadow,
+                  color: authLoading ? T.textMuted : btnPrimary.color,
                 }}
                 onMouseEnter={(e) => { if (!authLoading) (e.currentTarget as HTMLElement).style.transform = 'scale(1.02)' }}
                 onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.transform = 'scale(1)' }}

@@ -5,7 +5,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useTheme } from '@/context/ThemeContext'
 import { btnPrimary, BROWN_PRIMARY, THEME } from '@/lib/theme'
-import { useRouter, useSearchParams } from 'next/navigation'   // ← replaces useNavigate for auth redirects
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useNavigate } from '@/context/NavigationContext'
 
 import { useAuth } from '@/context/Auth/AuthContext'
@@ -71,7 +71,6 @@ const IconArrowLeft = () => (
 // ─── COMPONENT ───────────────────────────────────────────────
 const Login = () => {
   const { darkMode, toggleTheme, T } = useTheme()
-  const { navigate }                 = useNavigate()
   const router                       = useRouter()
   const searchParams                 = useSearchParams()
   const redirect                     = searchParams.get('redirect') || '/dashboard'
