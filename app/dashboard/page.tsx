@@ -163,7 +163,7 @@ export default function Dashboard() {
       </div>
 
       {/* Header */}
-      <header className="relative z-10 sticky top-0 flex items-center justify-between px-6 lg:px-10 h-16"
+      <header className="z-10 sticky top-0 flex items-center justify-between px-6 lg:px-10 h-16"
         style={{
           backgroundColor: T.navBgScrolled,
           backdropFilter: 'blur(20px)',

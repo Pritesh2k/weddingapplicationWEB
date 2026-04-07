@@ -123,7 +123,7 @@ const Login = () => {
       <div className="fixed inset-0 pointer-events-none" aria-hidden="true">
         <div className="absolute inset-0" style={{ background: T.heroBg }} />
         <div
-          className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] rounded-full blur-3xl"
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-175 h-100 rounded-full blur-3xl"
           style={{
             background: darkMode
               ? 'radial-gradient(ellipse, rgba(160,120,72,0.10) 0%, transparent 70%)'

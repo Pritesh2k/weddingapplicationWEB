@@ -196,8 +196,8 @@ export default function ProgrammePage() {
             <div className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }} aria-hidden>
                 <div className="absolute inset-0" style={{ background: T.heroBg }} />
                 <div className="absolute top-0 left-1/2 -translate-x-1/2
-                        w-[320px] sm:w-[520px] md:w-[700px]
-                        h-[300px] sm:h-[400px] md:h-[500px]
+                        w-[320px] sm:w-130 md:w-175
+                        h-75 sm:h-100 md:h-125
                         rounded-full blur-3xl"
                     style={{ background: T.heroGlow }} />
             </div>
@@ -265,7 +265,7 @@ export default function ProgrammePage() {
                             : '0 8px 40px rgba(139,107,71,0.10), 0 1px 4px rgba(0,0,0,0.04)',
                     }}>
 
-                    <div className="h-[3px] w-full" style={{ background: btnPrimary.bg }} />
+                    <div className="h-0.75 w-full" style={{ background: btnPrimary.bg }} />
 
                     <div className="px-5 sm:px-7 md:px-8 pt-6 sm:pt-7 pb-5 sm:pb-6">
 
@@ -467,7 +467,7 @@ export default function ProgrammePage() {
 
                             {/* ── Continuous spine line — absolutely positioned behind all nodes ── */}
                             <div
-                                className="absolute left-[13px] sm:left-[15px] top-4 bottom-4 w-px"
+                                className="absolute left-3.25 sm:left-3.75 top-4 bottom-4 w-px"
                                 style={{
                                     background: darkMode
                                         ? 'rgba(160,120,72,0.30)'

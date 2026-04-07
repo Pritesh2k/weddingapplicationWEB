@@ -213,7 +213,7 @@ const Navbar = ({ scrollTo, navItems = [], IconRings, IconMoon, IconSun }: Navba
             aria-label={menuOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={menuOpen}
           >
-            <div className="w-4 h-4 relative flex flex-col items-center justify-center gap-[5px]">
+            <div className="w-4 h-4 relative flex flex-col items-center justify-center gap-1.25">
               {[0, 1, 2].map((i) => (
                 <span
                   key={i}

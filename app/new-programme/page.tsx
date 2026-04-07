@@ -331,7 +331,7 @@ export default function NewProgramme() {
             {/* Background */}
             <div className="fixed inset-0 pointer-events-none" aria-hidden="true">
                 <div className="absolute inset-0" style={{ background: T.heroBg }} />
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] rounded-full blur-3xl"
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-175 h-100 rounded-full blur-3xl"
                     style={{
                         background: darkMode
                             ? 'radial-gradient(ellipse, rgba(160,120,72,0.10) 0%, transparent 70%)'
@@ -593,7 +593,7 @@ export default function NewProgramme() {
                                         </button>
                                     )}
 
-                                    <div className="space-y-3 mb-4 max-h-[320px] overflow-y-auto pr-1">
+                                    <div className="space-y-3 mb-4 max-h-80 overflow-y-auto pr-1">
                                         {data.subEvents.map((evt, i) => (
                                             <div key={evt.id} className="rounded-xl p-3 space-y-2"
                                                 style={{ backgroundColor: T.surface2, border: `1px solid ${T.borderBrown}` }}>
