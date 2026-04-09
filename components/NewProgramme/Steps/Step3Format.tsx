@@ -6,10 +6,12 @@ import type { ProgrammeData, WeddingFormat } from '@/lib/NewProgramme/types'
 import { IconCheck } from '@/lib/NewProgramme/icons'
 
 const FORMATS: { id: WeddingFormat; label: string; desc: string; icon: string }[] = [
-  { id: 'single-day',  label: 'Single Day',   icon: '☀️', desc: 'One main event, optional micro-events'     },
-  { id: 'multi-day',   label: 'Multi-Day',    icon: '📅', desc: 'Linked events over several days'           },
-  { id: 'destination', label: 'Destination',  icon: '✈️', desc: 'Travel, accommodation & logistics focus'   },
-  { id: 'custom',      label: 'Custom',       icon: '✦',  desc: 'Start from a blank structure'              },
+  { id: 'single_day',          label: 'Single Day',       icon: '☀️', desc: 'One main event, optional micro-events'   },
+  { id: 'multi_day',           label: 'Multi-Day',        icon: '📅', desc: 'Linked events over several days'         },
+  { id: 'destination',         label: 'Destination',      icon: '✈️', desc: 'Travel, accommodation & logistics focus' },
+  { id: 'interfaith',          label: 'Interfaith',       icon: '🕊️', desc: 'Multiple faith traditions combined'      },
+  { id: 'civil_plus_cultural', label: 'Civil + Cultural', icon: '⚖️', desc: 'Legal ceremony and cultural events'      },
+  { id: 'custom',              label: 'Custom',           icon: '✦',  desc: 'Start from a blank structure'            },
 ]
 
 interface Props { data: ProgrammeData; patch: (f: Partial<ProgrammeData>) => void }

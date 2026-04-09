@@ -1,4 +1,4 @@
-export type WeddingFormat = 'single-day' | 'multi-day' | 'destination' | 'custom'
+export type WeddingFormat = 'single_day' | 'multi_day' | 'destination' | 'interfaith' | 'civil_plus_cultural' | 'custom'
 export type CultureModule = 'hindu' | 'muslim' | 'christian' | 'civil' | 'blended'
 
 export interface SubEvent {

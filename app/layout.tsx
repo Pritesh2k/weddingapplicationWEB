@@ -1,4 +1,3 @@
-// app/layout.tsx
 import type { Metadata } from 'next'
 import { ThemeProvider }      from '@/context/ThemeContext'
 import { NavigationProvider } from '@/context/NavigationContext'
@@ -15,30 +14,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning>
       <head suppressHydrationWarning />
-      <body suppressHydrationWarning>
-
-        {/* Theme flash prevention */}
-        <script
-          suppressHydrationWarning
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function(){
-                try {
-                  var s = localStorage.getItem('vow-theme');
-                  var dark = s ? s === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
-                  document.documentElement.classList.toggle('dark', dark);
-                  var bg = dark ? '#1E1C1A' : '#F7F3ED';
-                  document.documentElement.style.backgroundColor = bg;
-                  document.body.style.backgroundColor = bg;
-                  document.addEventListener('DOMContentLoaded', function() {
-                    var wrapper = document.querySelector('[data-page-wrapper]');
-                    if (wrapper) wrapper.style.backgroundColor = bg;
-                  });
-                } catch(e){}
-              })();
-            `,
-          }}
-        />
+      <body className="bg-background text-foreground antialiased">
 
         <ThemeProvider>
           <AuthProvider>

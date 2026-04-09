@@ -26,13 +26,21 @@ export const STEPS = [
 ]
 
 export const EMPTY: ProgrammeData = {
-  step: 1,
-  coupleNameA: '', coupleNameB: '',
-  title: '', dateFrom: '', dateTo: '',
-  region: '', currency: 'GBP',
-  format: '', cultures: [], subEvents: [],
-  guestEstimate: '', budgetTarget: '',
-  priorities: [], hasPlanner: null,
+  step:          1,
+  coupleNameA:   '',
+  coupleNameB:   '',
+  title:         '',
+  dateFrom:      '',
+  dateTo:        '',
+  region:        '',
+  currency:      'GBP',
+  format:        'single_day',
+  cultures:      [],
+  subEvents:     [],
+  guestEstimate: '',
+  budgetTarget:  '',
+  priorities:    [],
+  hasPlanner:    null,
 }
 
 export const TOTAL_STEPS = STEPS.length
