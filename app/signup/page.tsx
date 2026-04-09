@@ -210,7 +210,7 @@ const Signup = () => {
           <span className="group-hover:-translate-x-0.5 transition-transform duration-200">
             <IconArrowLeft />
           </span>
-          <span className="hidden sm:inline">Home</span>
+          <span className="hidden sm:inline">Back</span>
         </Link>
 
         <Link href="/" className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2 focus:outline-none">
