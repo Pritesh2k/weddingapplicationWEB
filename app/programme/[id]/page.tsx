@@ -4,9 +4,11 @@ import { useEffect, useRef, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { useTheme } from '@/context/ThemeContext'
 import { useNavigate } from '@/context/NavigationContext'
-import { useAuth } from '@/context/Auth/AuthContext'       // ← NEW
-import { supabase } from '@/DB/client'                     // ← NEW
+import { useAuth } from '@/context/Auth/AuthContext'
+import { supabase } from '@/DB/client'
 import { btnPrimary } from '@/lib/theme'
+import { useRouter } from 'next/navigation'
+
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
@@ -25,15 +27,20 @@ export default function ProgrammePage() {
     const params = useParams()
     const { T, darkMode } = useTheme()
     const { navigate } = useNavigate()
-    const { user } = useAuth()                        // ← NEW
+    const { user, loading } = useAuth()
+    const router = useRouter()
     const progId = Array.isArray(params.id) ? params.id[0] : params.id as string
 
     const [programme, setProgramme] = useState<Programme | null>(null)
     const [ready, setReady] = useState(false)
     const [notFound, setNotFound] = useState(false)
-    const rightColRef = useRef<HTMLDivElement>(null)
+    const rightColRef = useRef<HTMLDivElement | null>(null)
 
     const handleProgrammeChange = (updated: Programme) => setProgramme(updated)
+
+    useEffect(() => {
+        if (!loading && !user) router.push('/login')
+    }, [user, loading, router])
 
     // ── Load from Supabase ──────────────────────────────────
     useEffect(() => {
@@ -45,9 +52,6 @@ export default function ProgrammePage() {
                     p_uid: user.uid,
                     p_programme_id: progId,
                 })
-
-            console.log('[Programme] data:', data)
-            console.log('[Programme] error:', error)
 
             if (error || !data) {
                 setNotFound(true)

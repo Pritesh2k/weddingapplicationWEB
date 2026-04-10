@@ -6,6 +6,8 @@ import { btnPrimary } from '@/lib/theme'
 import { useNavigate } from '@/context/NavigationContext'
 import { useAuth } from '@/context/Auth/AuthContext'
 import { supabase } from '@/DB/client'
+import { useRouter } from 'next/navigation'
+import type { SupabaseProgrammeRow } from '@/lib/supabase'
 
 import DashboardHeader from '@/components/Dashboard/Header/component'
 import EmptyState from '@/components/Dashboard/EmptyState/component'
@@ -18,12 +20,13 @@ import type { SupabaseProgramme } from '@/lib/Dashboard/types'
 export default function Dashboard() {
   const { T } = useTheme()
   const { navigate } = useNavigate()
-  const { user } = useAuth()
+  const { user, loading } = useAuth()
+  const router = useRouter()
 
   const [programmes, setProgrammes] = useState<SupabaseProgramme[]>([])
   const [ready, setReady] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
-  
+
 
   // ── FETCH PROGRAMMES ────────────────────────────────────────
   const fetchProgrammes = useCallback(async () => {
@@ -46,7 +49,7 @@ export default function Dashboard() {
       console.error('[Dashboard] fetch failed:', error.message)
       setProgrammes([])
     } else {
-      const mapped: SupabaseProgramme[] = (data ?? []).map((p: any) => ({
+      const mapped: SupabaseProgramme[] = (data ?? []).map((p) => ({
         id: p.id,
         title: p.title,
         format: p.format,
@@ -69,6 +72,10 @@ export default function Dashboard() {
   useEffect(() => {
     fetchProgrammes()
   }, [fetchProgrammes])
+
+  useEffect(() => {
+    if (!loading && !user) router.push('/login')
+  }, [user, loading, router])
 
   // ── DELETE PROGRAMME ────────────────────────────────────────
   const handleDelete = async (id: string) => {

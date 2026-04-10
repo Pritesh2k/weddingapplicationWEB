@@ -6,9 +6,9 @@ import { PRIORITIES } from '@/lib/NewProgramme/constants'
 import type { ProgrammeData } from '@/lib/NewProgramme/types'
 
 interface Props {
-  data:           ProgrammeData
-  patch:          (f: Partial<ProgrammeData>) => void
-  inp:            () => React.CSSProperties
+  data: ProgrammeData
+  patch: (f: Partial<ProgrammeData>) => void
+  inp: () => React.CSSProperties
   togglePriority: (p: string) => void
 }
 
@@ -59,28 +59,24 @@ export default function Step6Constraints({ data, patch, inp, togglePriority }: P
         <div>
           <label className="block text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: T.textMuted }}>
             Top priorities{' '}
-            <span className="normal-case font-normal opacity-70">(pick up to 3)</span>
+            <span className="normal-case font-normal opacity-70">(pick any that apply)</span>
           </label>
           <div className="flex flex-wrap gap-2">
             {PRIORITIES.map((p) => {
               const active = data.priorities.includes(p)
-              const maxed  = data.priorities.length >= 3 && !active
               return (
                 <button
                   key={p}
                   type="button"
                   onClick={() => togglePriority(p)}
-                  disabled={maxed}
                   className="px-3 py-1.5 rounded-full text-xs font-semibold
-                             transition-all duration-200 focus:outline-none"
+                 transition-all duration-200 focus:outline-none"
                   style={{
                     backgroundColor: active
                       ? darkMode ? 'rgba(139,107,71,0.25)' : 'rgba(139,107,71,0.14)'
                       : T.surface,
-                    border:  `1px solid ${active ? BROWN_PRIMARY : T.borderSubtle}`,
-                    color:   active ? T.accentText : maxed ? T.textMuted : T.textSecondary,
-                    opacity: maxed ? 0.4 : 1,
-                    cursor:  maxed ? 'not-allowed' : 'pointer',
+                    border: `1px solid ${active ? BROWN_PRIMARY : T.borderSubtle}`,
+                    color: active ? T.accentText : T.textSecondary,
                   }}
                 >
                   {p}
@@ -110,7 +106,7 @@ export default function Step6Constraints({ data, patch, inp, togglePriority }: P
                       ? darkMode ? 'rgba(139,107,71,0.18)' : 'rgba(139,107,71,0.10)'
                       : T.surface,
                     border: `1.5px solid ${active ? BROWN_PRIMARY : T.borderSubtle}`,
-                    color:  active ? T.accentText : T.textSecondary,
+                    color: active ? T.accentText : T.textSecondary,
                     boxShadow: active ? `0 0 0 3px ${BROWN_PRIMARY}15` : 'none',
                   }}
                 >

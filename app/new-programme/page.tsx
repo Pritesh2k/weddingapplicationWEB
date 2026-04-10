@@ -120,7 +120,7 @@ export default function NewProgramme() {
 
     // 2. Insert sub-events
     if (data.subEvents.length > 0) {
-      await supabase.from('events').insert(
+      const { error: eventsError } = await supabase.from('events').insert(
         data.subEvents.map((e, i) => ({
           program_id: programId,
           title: e.name || `Event ${i + 1}`,
@@ -130,6 +130,10 @@ export default function NewProgramme() {
           sort_order: i,
         }))
       )
+      if (eventsError) {
+        console.error('[NewProgramme] events insert failed:', eventsError.message)
+        // Programme was created — still navigate, don't block user
+      }
     }
 
     // 3. Clean up draft
@@ -177,10 +181,9 @@ export default function NewProgramme() {
   const togglePriority = (p: string) => {
     const next = data.priorities.includes(p)
       ? data.priorities.filter((x) => x !== p)
-      : data.priorities.length < 3 ? [...data.priorities, p] : data.priorities
+      : [...data.priorities, p]
     patch({ priorities: next })
   }
-
   // ── Shared input style ────────────────────────────────────
   const inp = (): React.CSSProperties => ({
     backgroundColor: T.inputBg,

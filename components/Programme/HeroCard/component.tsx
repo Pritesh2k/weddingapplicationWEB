@@ -1,5 +1,6 @@
 'use client'
 
+import { supabase } from '@/DB/client'
 import { useState, useRef, useCallback } from 'react'
 import { BROWN_PRIMARY, BROWN_LIGHT } from '@/lib/theme'
 import { useTheme } from '@/context/ThemeContext'
@@ -218,17 +219,25 @@ export default function HeroCard({ programme: p, onChange }: Props) {
         ? fmtDate(p.dateFrom, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
         : null
 
-    const save = useCallback((patch: Partial<Programme>) => {
+    const save = useCallback(async (patch: Partial<Programme>) => {
         const updated = { ...p, ...patch }
         onChange(updated)
-        try {
-            const list: Programme[] = JSON.parse(localStorage.getItem('vow-programmes') || '[]')
-            const idx = list.findIndex((x) => x.id === p.id)
-            if (idx !== -1) {
-                list[idx] = updated
-                localStorage.setItem('vow-programmes', JSON.stringify(list))
-            }
-        } catch { }
+
+        // Build the Supabase column map
+        const updates: Record<string, unknown> = {}
+        if (patch.dateFrom !== undefined) updates.date_start = patch.dateFrom || null
+        if (patch.region !== undefined) updates.region = patch.region || null
+        if (patch.guestEstimate !== undefined) updates.guest_estimate = patch.guestEstimate || null
+        if (patch.budgetTarget !== undefined) updates.budget_target = patch.budgetTarget || null
+
+        if (Object.keys(updates).length > 0) {
+            const { error } = await supabase
+                .from('wedding_programs')
+                .update(updates)
+                .eq('id', p.id)
+
+            if (error) console.error('[HeroCard] save failed:', error.message)
+        }
     }, [p, onChange])
 
     const dateEdit = useInlineEdit(p.dateFrom, (v) => save({ dateFrom: v }))
