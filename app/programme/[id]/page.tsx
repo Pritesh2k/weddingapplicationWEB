@@ -64,18 +64,18 @@ export default function ProgrammePage() {
                 id: data.id,
                 title: data.title,
                 format: data.format,
-                coupleNameA: data.couple_name_a ?? '',   // ← was hardcoded ''
-                coupleNameB: data.couple_name_b ?? '',   // ← was hardcoded ''
+                coupleNameA: data.couple_name_a ?? '',
+                coupleNameB: data.couple_name_b ?? '',
                 dateFrom: data.date_start ?? '',
                 dateTo: data.date_end ?? '',
                 region: data.region ?? '',
                 currency: data.currency ?? 'GBP',
                 cultures: data.culture_modules ?? [],
                 priorities: data.priorities ?? [],
-                guestEstimate: data.guest_estimate ?? '',   // ← was hardcoded ''
-                budgetTarget: data.budget_target ?? '',   // ← was hardcoded ''
-                hasPlanner: data.has_planner ?? null, // ← was hardcoded null
-                createdAt: data.created_at ?? '',   // ← was hardcoded ''
+                guestEstimate: data.guest_estimate ? data.guest_estimate.toString() : '',  // ← FIXED
+                budgetTarget: data.budget_target ? data.budget_target.toString() : '',  // ← FIXED
+                hasPlanner: data.has_planner ?? null,
+                createdAt: data.created_at ?? '',
                 subEvents: (data.events ?? []).map((e: SupabaseEventRow) => ({
                     id: e.id,
                     name: e.title,
