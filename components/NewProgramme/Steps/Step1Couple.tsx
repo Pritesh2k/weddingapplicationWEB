@@ -9,6 +9,8 @@ interface Props {
   inp:   () => React.CSSProperties
 }
 
+const Required = () => <span style={{ color: '#D4847A', marginLeft: '2px' }}>*</span>
+
 export default function Step1Couple({ data, patch, inp }: Props) {
   const { T } = useTheme()
   return (
@@ -19,8 +21,11 @@ export default function Step1Couple({ data, patch, inp }: Props) {
       <h2 className="text-2xl font-bold tracking-tight mb-1" style={{ color: T.textPrimary }}>
         Who is getting married?
       </h2>
-      <p className="text-sm mb-8" style={{ color: T.textMuted }}>
+      <p className="text-sm mb-2" style={{ color: T.textMuted }}>
         This names your programme and personalises your experience.
+      </p>
+      <p className="text-xs mb-6" style={{ color: '#D4847A' }}>
+        * These names are permanent and cannot be changed after creation.
       </p>
       <div className="space-y-4">
         {[
@@ -32,7 +37,7 @@ export default function Step1Couple({ data, patch, inp }: Props) {
               className="block text-xs font-semibold uppercase tracking-wider mb-1.5"
               style={{ color: T.textMuted }}
             >
-              {label}
+              {label}<Required />
             </label>
             <input
               type="text"
