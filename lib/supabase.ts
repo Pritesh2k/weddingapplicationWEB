@@ -13,6 +13,8 @@ export interface SupabaseProgrammeRow {
   guest_estimate: string | null
   budget_target: string | null
   priorities: string[]
+  has_planner: boolean | null
+  created_at:  string | null
 }
 
 export interface SupabaseEventRow {

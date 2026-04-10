@@ -1,12 +1,13 @@
 import type { Metadata } from 'next'
-import { ThemeProvider }      from '@/context/ThemeContext'
+import { ThemeProvider } from '@/context/ThemeContext'
 import { NavigationProvider } from '@/context/NavigationContext'
-import { AuthProvider }       from '@/context/Auth/AuthContext'
-import PageTransition         from '@/components/PageTransition'
+import { AuthProvider } from '@/context/Auth/AuthContext'
+import PageTransition from '@/components/PageTransition'
+import ErrorBoundary from '@/components/ErrorBoundary'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title:       'Vow — Wedding Operating System',
+  title: 'Vow — Wedding Operating System',
   description: 'Plan the day. Run the day.',
 }
 
@@ -19,9 +20,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeProvider>
           <AuthProvider>
             <NavigationProvider>
-              <PageTransition>
-                {children}
-              </PageTransition>
+              <ErrorBoundary>
+                <PageTransition>
+                  {children}
+                </PageTransition>
+              </ErrorBoundary>
             </NavigationProvider>
           </AuthProvider>
         </ThemeProvider>

@@ -40,7 +40,8 @@ export default function Dashboard() {
         id, owner_id, title, format,
         date_start, date_end, region, currency,
         couple_name_a, couple_name_b,
-        guest_estimate, budget_target
+        guest_estimate, budget_target,
+        events(count)          
       `)
       .is('deleted_at', null)
       .order('created_at', { ascending: false })
@@ -61,7 +62,7 @@ export default function Dashboard() {
         couple_name_b: p.couple_name_b ?? null,
         guest_estimate: Number(p.guest_estimate) || null,
         budget_target: Number(p.budget_target) || null,
-        event_count: 0,
+        event_count: (p.events as unknown as [{ count: number }])[0]?.count ?? 0,
       }))
       setProgrammes(mapped)
     }

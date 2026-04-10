@@ -20,6 +20,7 @@ import PrioritiesCard from '@/components/Programme/PrioritiesCard/component'
 import DetailsCard from '@/components/Programme/DetailsCard/component'
 import HeroCardMobile from '@/components/Programme/HeroCard/mobile'
 import type { Programme } from '@/lib/Programme/types'
+import { SupabaseEventRow } from '@/lib/supabase'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -63,26 +64,25 @@ export default function ProgrammePage() {
                 id: data.id,
                 title: data.title,
                 format: data.format,
-                coupleNameA: '',
-                coupleNameB: '',
+                coupleNameA: data.couple_name_a ?? '',   // ← was hardcoded ''
+                coupleNameB: data.couple_name_b ?? '',   // ← was hardcoded ''
                 dateFrom: data.date_start ?? '',
                 dateTo: data.date_end ?? '',
                 region: data.region ?? '',
-                currency: data.currency,
+                currency: data.currency ?? 'GBP',
                 cultures: data.culture_modules ?? [],
                 priorities: data.priorities ?? [],
-                guestEstimate: '',
-                budgetTarget: '',
-                hasPlanner: null,
-                createdAt: '',
-                subEvents: (data.events ?? [])
-                    .map((e: any) => ({
-                        id: e.id,
-                        name: e.title,
-                        date: e.event_date ?? '',
-                        startTime: e.start_time ?? '',
-                        endTime: e.end_time ?? '',
-                    })),
+                guestEstimate: data.guest_estimate ?? '',   // ← was hardcoded ''
+                budgetTarget: data.budget_target ?? '',   // ← was hardcoded ''
+                hasPlanner: data.has_planner ?? null, // ← was hardcoded null
+                createdAt: data.created_at ?? '',   // ← was hardcoded ''
+                subEvents: (data.events ?? []).map((e: SupabaseEventRow) => ({
+                    id: e.id,
+                    name: e.title,
+                    date: e.event_date ?? '',
+                    startTime: e.start_time ?? '',
+                    endTime: e.end_time ?? '',
+                })),
             }
 
             setProgramme(mapped)
