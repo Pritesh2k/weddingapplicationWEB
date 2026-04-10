@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { btnPrimary } from '@/lib/theme'
 import { useTheme } from '@/context/ThemeContext'
 import { supabase } from '@/DB/client'
+import { useAuth } from '@/context/Auth/AuthContext'
 import { PRIORITIES as PRESETS } from '@/lib/NewProgramme/constants'
 
 interface Props {
@@ -31,10 +32,12 @@ const IconEdit = () => (
 
 export default function PrioritiesCard({ priorities, programmeId, onChange }: Props) {
   const { T, darkMode } = useTheme()
-  const [editing, setEditing]       = useState(false)
-  const [selected, setSelected]     = useState<string[]>(priorities)
+  const { user } = useAuth()
+  const [editing, setEditing]         = useState(false)
+  const [selected, setSelected]       = useState<string[]>(priorities)
   const [customInput, setCustomInput] = useState('')
-  const [saving, setSaving]         = useState(false)
+  const [saving, setSaving]           = useState(false)
+  const [saveError, setSaveError]     = useState('')
 
   const toggle = (p: string) => {
     setSelected(prev =>
@@ -50,12 +53,24 @@ export default function PrioritiesCard({ priorities, programmeId, onChange }: Pr
   }
 
   const save = async () => {
+    if (!user) return
     setSaving(true)
-    await supabase
-      .from('wedding_programs')
-      .update({ priorities: selected })
-      .eq('id', programmeId)
+    setSaveError('')
+
+    const { error } = await supabase.rpc('update_wedding_programme', {
+      p_uid:          user.uid,
+      p_programme_id: programmeId,
+      p_priorities:   selected,
+    })
+
     setSaving(false)
+
+    if (error) {
+      console.error('[PrioritiesCard] save failed:', error.message)
+      setSaveError('Failed to save. Please try again.')
+      return
+    }
+
     setEditing(false)
     onChange?.(selected)
   }
@@ -63,6 +78,7 @@ export default function PrioritiesCard({ priorities, programmeId, onChange }: Pr
   const cancel = () => {
     setSelected(priorities)
     setCustomInput('')
+    setSaveError('')
     setEditing(false)
   }
 
@@ -233,6 +249,11 @@ export default function PrioritiesCard({ priorities, programmeId, onChange }: Pr
                 ))}
               </div>
             </div>
+          )}
+
+          {/* Error */}
+          {saveError && (
+            <p className="text-xs" style={{ color: '#D4847A' }}>⚠ {saveError}</p>
           )}
 
           {/* Save / Cancel */}
