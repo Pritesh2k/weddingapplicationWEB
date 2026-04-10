@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/DB/server'
 
 export async function POST(req: NextRequest) {
+  // ── Auth check — reject anything not from our own app ──
+  const authHeader = req.headers.get('authorization')
+  if (authHeader !== `Bearer ${process.env.INTERNAL_API_SECRET}`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   const { uid, email, displayName } = await req.json()
 
   if (!uid) return NextResponse.json({ error: 'Missing uid' }, { status: 400 })

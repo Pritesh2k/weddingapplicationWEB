@@ -33,7 +33,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const syncUserToSupabase = async (firebaseUser: User) => {
     await fetch('/api/auth/sync', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.NEXT_PUBLIC_INTERNAL_API_SECRET}`,
+      },
       body: JSON.stringify({
         uid: firebaseUser.uid,
         email: firebaseUser.email,

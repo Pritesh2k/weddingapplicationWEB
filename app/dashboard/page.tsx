@@ -30,7 +30,7 @@ export default function Dashboard() {
 
   // ── FETCH PROGRAMMES ────────────────────────────────────────
   const fetchProgrammes = useCallback(async () => {
-    if (!user) return
+    if (!user || loading) return
 
     setReady(false)
 

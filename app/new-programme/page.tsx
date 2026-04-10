@@ -90,10 +90,8 @@ export default function NewProgramme() {
     setError('')
     submittedRef.current = true
 
-    // Re-set UID immediately before insert — session vars are transaction-scoped
-    await supabase.rpc('set_firebase_uid', { uid: user.uid })
-
     // 1. Create programme + member atomically via RPC
+    // No set_firebase_uid needed — RPC is SECURITY DEFINER and receives p_uid directly
     const { data: programId, error: progError } = await supabase
       .rpc('create_wedding_programme', {
         p_uid: user.uid,
@@ -184,6 +182,7 @@ export default function NewProgramme() {
       : [...data.priorities, p]
     patch({ priorities: next })
   }
+
   // ── Shared input style ────────────────────────────────────
   const inp = (): React.CSSProperties => ({
     backgroundColor: T.inputBg,
