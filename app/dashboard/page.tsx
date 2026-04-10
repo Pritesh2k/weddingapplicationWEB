@@ -7,7 +7,6 @@ import { useNavigate } from '@/context/NavigationContext'
 import { useAuth } from '@/context/Auth/AuthContext'
 import { supabase } from '@/DB/client'
 import { useRouter } from 'next/navigation'
-import type { SupabaseProgrammeRow } from '@/lib/supabase'
 
 import DashboardHeader from '@/components/Dashboard/Header/component'
 import EmptyState from '@/components/Dashboard/EmptyState/component'
@@ -27,30 +26,20 @@ export default function Dashboard() {
   const [ready, setReady] = useState(false)
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
 
-
-  // ── FETCH PROGRAMMES ────────────────────────────────────────
+  // ── FETCH PROGRAMMES via RPC ───────────────────────────────────
   const fetchProgrammes = useCallback(async () => {
     if (!user || loading) return
 
     setReady(false)
 
     const { data, error } = await supabase
-      .from('wedding_programs')
-      .select(`
-        id, owner_id, title, format,
-        date_start, date_end, region, currency,
-        couple_name_a, couple_name_b,
-        guest_estimate, budget_target,
-        events(count)          
-      `)
-      .is('deleted_at', null)
-      .order('created_at', { ascending: false })
+      .rpc('get_dashboard_programmes', { p_uid: user.uid })
 
     if (error) {
       console.error('[Dashboard] fetch failed:', error.message)
       setProgrammes([])
     } else {
-      const mapped: SupabaseProgramme[] = (data ?? []).map((p) => ({
+      const mapped: SupabaseProgramme[] = (data ?? []).map((p: any) => ({
         id: p.id,
         title: p.title,
         format: p.format,
@@ -62,7 +51,7 @@ export default function Dashboard() {
         couple_name_b: p.couple_name_b ?? null,
         guest_estimate: Number(p.guest_estimate) || null,
         budget_target: Number(p.budget_target) || null,
-        event_count: (p.events as unknown as [{ count: number }])[0]?.count ?? 0,
+        event_count: Number(p.event_count) ?? 0,
       }))
       setProgrammes(mapped)
     }
@@ -78,12 +67,13 @@ export default function Dashboard() {
     if (!loading && !user) router.push('/login')
   }, [user, loading, router])
 
-  // ── DELETE PROGRAMME ────────────────────────────────────────
+  // ── DELETE PROGRAMME via RPC ────────────────────────────────
   const handleDelete = async (id: string) => {
     const { error } = await supabase
-      .from('wedding_programs')
-      .update({ deleted_at: new Date().toISOString() })
-      .eq('id', id)
+      .rpc('delete_wedding_programme', {
+        p_uid: user!.uid,
+        p_programme_id: id,
+      })
 
     if (error) {
       console.error('[Dashboard] delete failed:', error.message)
@@ -93,7 +83,7 @@ export default function Dashboard() {
     setDeleteConfirm(null)
   }
 
-  // ── LOADING ─────────────────────────────────────────────────
+  // ── LOADING ──────────────────────────────────────────────────
   if (!ready) {
     return (
       <div className="min-h-screen flex items-center justify-center"
@@ -104,7 +94,7 @@ export default function Dashboard() {
     )
   }
 
-  // ── PAGE ────────────────────────────────────────────────────
+  // ── PAGE ──────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen font-sans antialiased"
       style={{ backgroundColor: T.bg, color: T.textPrimary }}>
