@@ -64,13 +64,46 @@ export default function NewProgramme() {
   // ── Validation ────────────────────────────────────────────
   const validate = (): boolean => {
     const fail = (msg: string) => { setError(msg); return false }
+
     switch (data.step) {
-      case 1: return (data.coupleNameA.trim() && data.coupleNameB.trim()) ? true : fail('Please enter both names.')
-      case 2: return (data.title.trim() && data.dateFrom) ? true : fail('Please enter a title and start date.')
-      case 3: return data.format ? true : fail('Please select a wedding format.')
-      case 4: return data.cultures.length > 0 ? true : fail('Please select at least one tradition.')
-      case 5: return data.subEvents.length > 0 ? true : fail('Please add at least one event.')
-      case 6: return (data.guestEstimate && data.budgetTarget) ? true : fail('Please fill in guest estimate and budget.')
+
+      // Step 1 — Both names mandatory, no edit later (handled by not exposing in edit UI)
+      case 1:
+        if (!data.coupleNameA.trim()) return fail('Please enter Partner One\'s name.')
+        if (!data.coupleNameB.trim()) return fail('Please enter Partner Two\'s name.')
+        return true
+
+      // Step 2 — Title + start date mandatory, end date mandatory, region/currency optional
+      case 2:
+        if (!data.title.trim()) return fail('Please enter a programme title.')
+        if (!data.dateFrom) return fail('Please select a start date.')
+        if (!data.dateTo) return fail('Please select an end date.')
+        return true
+
+      // Step 3 — Format mandatory
+      case 3:
+        if (!data.format) return fail('Please select a wedding format.')
+        return true
+
+      // Step 4 — At least one tradition mandatory
+      case 4:
+        if (data.cultures.length === 0) return fail('Please select at least one tradition.')
+        return true
+
+      // Step 5 — At least one event with a name mandatory
+      case 5:
+        if (data.subEvents.length === 0) return fail('Please add at least one event.')
+        if (data.subEvents.some(e => !e.name.trim())) return fail('Please give every event a name.')
+        return true
+
+      // Step 6 — Guest estimate, budget, priorities, and planner all mandatory
+      case 6:
+        if (!data.guestEstimate) return fail('Please enter a guest estimate.')
+        if (!data.budgetTarget) return fail('Please enter a budget target.')
+        if (data.priorities.length === 0) return fail('Please select at least one priority.')
+        if (data.hasPlanner === null || data.hasPlanner === undefined)
+          return fail('Please let us know if you have a planner.')
+        return true
     }
     return true
   }

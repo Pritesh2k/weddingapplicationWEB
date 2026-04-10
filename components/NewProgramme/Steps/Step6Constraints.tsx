@@ -6,11 +6,13 @@ import { PRIORITIES } from '@/lib/NewProgramme/constants'
 import type { ProgrammeData } from '@/lib/NewProgramme/types'
 
 interface Props {
-  data: ProgrammeData
-  patch: (f: Partial<ProgrammeData>) => void
-  inp: () => React.CSSProperties
+  data:           ProgrammeData
+  patch:          (f: Partial<ProgrammeData>) => void
+  inp:            () => React.CSSProperties
   togglePriority: (p: string) => void
 }
+
+const Required = () => <span style={{ color: '#D4847A', marginLeft: '2px' }}>*</span>
 
 export default function Step6Constraints({ data, patch, inp, togglePriority }: Props) {
   const { darkMode, T } = useTheme()
@@ -22,8 +24,11 @@ export default function Step6Constraints({ data, patch, inp, togglePriority }: P
       <h2 className="text-2xl font-bold tracking-tight mb-1" style={{ color: T.textPrimary }}>
         Set your foundations
       </h2>
-      <p className="text-sm mb-8" style={{ color: T.textMuted }}>
+      <p className="text-sm mb-2" style={{ color: T.textMuted }}>
         These shape your planning model, task generation, and recommendations.
+      </p>
+      <p className="text-xs mb-6" style={{ color: '#D4847A' }}>
+        * All fields on this step are required.
       </p>
 
       <div className="space-y-6">
@@ -31,7 +36,7 @@ export default function Step6Constraints({ data, patch, inp, togglePriority }: P
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: T.textMuted }}>
-              Guest estimate
+              Guest estimate<Required />
             </label>
             <input
               type="number"
@@ -43,7 +48,7 @@ export default function Step6Constraints({ data, patch, inp, togglePriority }: P
           </div>
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: T.textMuted }}>
-              Budget target ({data.currency})
+              Budget target ({data.currency})<Required />
             </label>
             <input
               type="number"
@@ -58,8 +63,8 @@ export default function Step6Constraints({ data, patch, inp, togglePriority }: P
         {/* Priorities */}
         <div>
           <label className="block text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: T.textMuted }}>
-            Top priorities{' '}
-            <span className="normal-case font-normal opacity-70">(pick any that apply)</span>
+            Top priorities<Required />{' '}
+            <span className="normal-case font-normal opacity-70">(pick at least one)</span>
           </label>
           <div className="flex flex-wrap gap-2">
             {PRIORITIES.map((p) => {
@@ -79,17 +84,23 @@ export default function Step6Constraints({ data, patch, inp, togglePriority }: P
                     color: active ? T.accentText : T.textSecondary,
                   }}
                 >
+                  {active && <span className="mr-1">✓</span>}
                   {p}
                 </button>
               )
             })}
           </div>
+          {data.priorities.length > 0 && (
+            <p className="mt-2 text-xs" style={{ color: T.textMuted }}>
+              {data.priorities.length} priorit{data.priorities.length !== 1 ? 'ies' : 'y'} selected
+            </p>
+          )}
         </div>
 
         {/* Planner toggle */}
         <div>
           <label className="block text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: T.textMuted }}>
-            Working with a wedding planner?
+            Working with a wedding planner?<Required />
           </label>
           <div className="grid grid-cols-2 gap-3">
             {([true, false] as const).map((val) => {

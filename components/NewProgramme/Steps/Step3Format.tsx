@@ -1,68 +1,70 @@
 'use client'
 
-import { btnPrimary, BROWN_PRIMARY, THEME } from '@/lib/theme'
+import { BROWN_PRIMARY } from '@/lib/theme'
 import { useTheme } from '@/context/ThemeContext'
+import { FORMATS } from '@/lib/NewProgramme/constants'
 import type { ProgrammeData, WeddingFormat } from '@/lib/NewProgramme/types'
-import { IconCheck } from '@/lib/NewProgramme/icons'
 
-const FORMATS: { id: WeddingFormat; label: string; desc: string; icon: string }[] = [
-  { id: 'single_day',          label: 'Single Day',       icon: '☀️', desc: 'One main event, optional micro-events'   },
-  { id: 'multi_day',           label: 'Multi-Day',        icon: '📅', desc: 'Linked events over several days'         },
-  { id: 'destination',         label: 'Destination',      icon: '✈️', desc: 'Travel, accommodation & logistics focus' },
-  { id: 'interfaith',          label: 'Interfaith',       icon: '🕊️', desc: 'Multiple faith traditions combined'      },
-  { id: 'civil_plus_cultural', label: 'Civil + Cultural', icon: '⚖️', desc: 'Legal ceremony and cultural events'      },
-  { id: 'custom',              label: 'Custom',           icon: '✦',  desc: 'Start from a blank structure'            },
-]
-
-interface Props { data: ProgrammeData; patch: (f: Partial<ProgrammeData>) => void }
+interface Props {
+  data: ProgrammeData
+  patch: (f: Partial<ProgrammeData>) => void
+}
 
 export default function Step3Format({ data, patch }: Props) {
   const { darkMode, T } = useTheme()
+
   return (
     <div>
       <p className="text-xs font-bold tracking-widest uppercase mb-2" style={{ color: T.accentText }}>
         Step 3 · Format
       </p>
       <h2 className="text-2xl font-bold tracking-tight mb-1" style={{ color: T.textPrimary }}>
-        What kind of wedding?
+        What is your wedding format?
       </h2>
-      <p className="text-sm mb-8" style={{ color: T.textMuted }}>
-        This shapes your programme structure, logistics, and planning model.
+      <p className="text-sm mb-2" style={{ color: T.textMuted }}>
+        This shapes how your timeline and events are structured.
       </p>
-      <div className="grid grid-cols-2 gap-3">
-        {FORMATS.map((f) => {
-          const active = data.format === f.id
+      <p className="text-xs mb-6" style={{ color: '#D4847A' }}>
+        * Required — you must select one to continue.
+      </p>
+
+      <div className="space-y-3">
+        {FORMATS.map(({ value, label, description }) => {
+          const active = data.format === value
+
           return (
             <button
-              key={f.id}
+              key={value}
               type="button"
-              onClick={() => patch({ format: f.id })}
-              className="group relative text-left p-4 rounded-2xl transition-all duration-200
-                         focus:outline-none hover:scale-[1.02]"
+              onClick={() => patch({ format: value as WeddingFormat })}
+              className="w-full text-left px-5 py-4 rounded-xl transition-all duration-200 focus:outline-none"
               style={{
                 backgroundColor: active
                   ? darkMode ? 'rgba(139,107,71,0.18)' : 'rgba(139,107,71,0.10)'
                   : T.surface,
-                border:    `1.5px solid ${active ? BROWN_PRIMARY : T.borderSubtle}`,
-                boxShadow: active
-                  ? `0 0 0 3px ${BROWN_PRIMARY}18`
-                  : '0 1px 3px rgba(0,0,0,0.04)',
+                border: `1.5px solid ${active ? BROWN_PRIMARY : T.borderSubtle}`,
+                boxShadow: active ? `0 0 0 3px ${BROWN_PRIMARY}18` : 'none',
               }}
             >
-              {/* Check badge */}
-              {active && (
-                <div
-                  className="absolute top-3 right-3 w-4 h-4 rounded-full flex items-center justify-center"
-                  style={{ background: btnPrimary.bg, color: THEME.btn.text }}
-                >
-                  <IconCheck />
-                </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-semibold" style={{ color: active ? T.accentText : T.textPrimary }}>
+                  {label}
+                </span>
+                {active && (
+                  <span
+                    className="text-xs font-bold px-2 py-0.5 rounded-full"
+                    style={{ background: 'rgba(139,107,71,0.15)', color: T.accentText }}
+                  >
+                    ✓
+                  </span>
+                )}
+              </div>
+
+              {description && (
+                <p className="text-xs mt-1" style={{ color: T.textMuted }}>
+                  {description}
+                </p>
               )}
-              <span className="text-xl mb-2 block">{f.icon}</span>
-              <p className="text-sm font-bold mb-1" style={{ color: active ? T.accentText : T.textPrimary }}>
-                {f.label}
-              </p>
-              <p className="text-xs leading-relaxed" style={{ color: T.textMuted }}>{f.desc}</p>
             </button>
           )
         })}

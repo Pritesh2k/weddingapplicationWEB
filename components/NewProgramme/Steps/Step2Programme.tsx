@@ -10,6 +10,9 @@ interface Props {
   inp:   () => React.CSSProperties
 }
 
+const Required = () => <span style={{ color: '#D4847A', marginLeft: '2px' }}>*</span>
+const Optional = () => <span style={{ color: 'inherit', marginLeft: '4px', fontWeight: 400, opacity: 0.55, fontSize: '10px', textTransform: 'none', letterSpacing: 0 }}>(optional)</span>
+
 export default function Step2Programme({ data, patch, inp }: Props) {
   const { darkMode, T } = useTheme()
   const dateStyle = { ...inp(), colorScheme: darkMode ? 'dark' as const : 'light' as const }
@@ -22,13 +25,13 @@ export default function Step2Programme({ data, patch, inp }: Props) {
       <h2 className="text-2xl font-bold tracking-tight mb-1" style={{ color: T.textPrimary }}>
         Name your programme
       </h2>
-      <p className="text-sm mb-8" style={{ color: T.textMuted }}>
+      <p className="text-sm mb-6" style={{ color: T.textMuted }}>
         Set the title, dates, region, and currency for your wedding.
       </p>
       <div className="space-y-4">
         <div>
           <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: T.textMuted }}>
-            Programme title
+            Programme title<Required />
           </label>
           <input
             type="text"
@@ -41,14 +44,14 @@ export default function Step2Programme({ data, patch, inp }: Props) {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: T.textMuted }}>
-              Start date
+              Start date<Required />
             </label>
             <input type="date" value={data.dateFrom}
               onChange={(e) => patch({ dateFrom: e.target.value })} style={dateStyle} />
           </div>
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: T.textMuted }}>
-              End date
+              End date<Required />
             </label>
             <input type="date" value={data.dateTo} min={data.dateFrom}
               onChange={(e) => patch({ dateTo: e.target.value })} style={dateStyle} />
@@ -57,14 +60,14 @@ export default function Step2Programme({ data, patch, inp }: Props) {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: T.textMuted }}>
-              Region / City
+              Region / City<Optional />
             </label>
             <input type="text" placeholder="e.g. London" value={data.region}
               onChange={(e) => patch({ region: e.target.value })} style={inp()} />
           </div>
           <div>
             <label className="block text-xs font-semibold uppercase tracking-wider mb-1.5" style={{ color: T.textMuted }}>
-              Currency
+              Currency<Optional />
             </label>
             <select value={data.currency} onChange={(e) => patch({ currency: e.target.value })}
               style={{ ...inp(), cursor: 'pointer' }}>

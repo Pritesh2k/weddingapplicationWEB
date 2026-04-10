@@ -1,21 +1,20 @@
 'use client'
 
+import { BROWN_PRIMARY } from '@/lib/theme'
 import { useTheme } from '@/context/ThemeContext'
 import type { ProgrammeData, SubEvent } from '@/lib/NewProgramme/types'
-import { IconPlus, IconTrash, IconSparkle } from '@/lib/NewProgramme/icons'
 
 interface Props {
-  data:        ProgrammeData
-  inp:         () => React.CSSProperties
+  data:          ProgrammeData
+  inp:           () => React.CSSProperties
   suggestEvents: () => void
-  addEvent:    () => void
-  removeEvent: (id: string) => void
-  updateEvent: (id: string, field: keyof SubEvent, value: string) => void
+  addEvent:      () => void
+  removeEvent:   (id: string) => void
+  updateEvent:   (id: string, field: keyof SubEvent, value: string) => void
 }
 
 export default function Step5Events({ data, inp, suggestEvents, addEvent, removeEvent, updateEvent }: Props) {
   const { darkMode, T } = useTheme()
-  const dateStyle = { ...inp(), padding: '7px 10px', fontSize: '12px', colorScheme: darkMode ? 'dark' as const : 'light' as const }
 
   return (
     <div>
@@ -25,84 +24,135 @@ export default function Step5Events({ data, inp, suggestEvents, addEvent, remove
       <h2 className="text-2xl font-bold tracking-tight mb-1" style={{ color: T.textPrimary }}>
         Build your programme
       </h2>
-      <p className="text-sm mb-5" style={{ color: T.textMuted }}>
-        Add or adjust the events in your wedding programme.
+      <p className="text-sm mb-2" style={{ color: T.textMuted }}>
+        Add the key events in your wedding — ceremony, reception, pre-events and more.
+      </p>
+      <p className="text-xs mb-5" style={{ color: '#D4847A' }}>
+        * At least one named event is required to continue.
       </p>
 
       {/* Suggest button */}
-      {data.cultures.length > 0 && data.subEvents.length === 0 && (
+      {data.cultures.length > 0 && (
         <button
           type="button"
           onClick={suggestEvents}
-          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl
-                     text-sm font-semibold mb-4 transition-all duration-200
+          className="w-full py-2.5 rounded-xl text-sm font-semibold mb-5 transition-all duration-200
                      hover:scale-[1.01] focus:outline-none"
           style={{
-            backgroundColor: T.surface,
-            border:          `1.5px dashed ${T.borderBrown}`,
-            color:           T.accentText,
+            background: darkMode ? 'rgba(139,107,71,0.15)' : 'rgba(139,107,71,0.09)',
+            border: `1.5px dashed ${BROWN_PRIMARY}`,
+            color: T.accentText,
           }}
         >
-          <IconSparkle /> Suggest events from your traditions
+          ✨ Suggest events from my traditions
         </button>
       )}
 
-      {/* Events list */}
-      <div className="space-y-2.5 mb-4 max-h-72 overflow-y-auto pr-0.5">
-        {data.subEvents.map((evt, i) => (
+      {/* Event list */}
+      <div className="space-y-4">
+        {data.subEvents.map((evt, idx) => (
           <div
             key={evt.id}
-            className="rounded-xl p-3 space-y-2"
-            style={{ backgroundColor: T.surface, border: `1px solid ${T.borderSubtle}` }}
+            className="rounded-xl p-4 space-y-3"
+            style={{
+              backgroundColor: darkMode ? 'rgba(255,255,255,0.03)' : 'rgba(139,107,71,0.04)',
+              border: `1px solid ${T.borderSubtle}`,
+            }}
           >
-            <div className="flex items-center gap-2">
-              <span
-                className="text-xs font-bold w-5 text-center shrink-0 tabular-nums"
-                style={{ color: T.accentText }}
-              >
-                {i + 1}
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xs font-bold uppercase tracking-wider" style={{ color: T.accentText }}>
+                Event {idx + 1}
               </span>
-              <input
-                type="text"
-                placeholder="Event name"
-                value={evt.name}
-                onChange={(e) => updateEvent(evt.id, 'name', e.target.value)}
-                style={{ ...inp(), padding: '8px 12px' }}
-              />
               <button
                 type="button"
                 onClick={() => removeEvent(evt.id)}
-                className="shrink-0 p-1.5 rounded-lg transition-colors focus:outline-none"
-                style={{ color: T.textMuted }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = '#D4847A')}
-                onMouseLeave={(e) => (e.currentTarget.style.color = T.textMuted)}
+                className="text-xs px-2.5 py-1 rounded-lg transition-all duration-200 hover:opacity-80 focus:outline-none"
+                style={{
+                  background: 'rgba(176,80,70,0.08)',
+                  border: '1px solid rgba(176,80,70,0.2)',
+                  color: '#D4847A',
+                }}
               >
-                <IconTrash />
+                Remove
               </button>
             </div>
-            <div className="grid grid-cols-3 gap-2 pl-7">
-              <input type="date"  value={evt.date}      onChange={(e) => updateEvent(evt.id, 'date', e.target.value)}      style={dateStyle} />
-              <input type="time"  value={evt.startTime} onChange={(e) => updateEvent(evt.id, 'startTime', e.target.value)} style={dateStyle} placeholder="Start" />
-              <input type="time"  value={evt.endTime}   onChange={(e) => updateEvent(evt.id, 'endTime', e.target.value)}   style={dateStyle} placeholder="End"   />
+
+            {/* Event name — required */}
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider mb-1" style={{ color: T.textMuted }}>
+                Event name <span style={{ color: '#D4847A' }}>*</span>
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. Ceremony, Reception, Mehndi..."
+                value={evt.name}
+                onChange={(e) => updateEvent(evt.id, 'name', e.target.value)}
+                style={inp()}
+              />
+            </div>
+
+            <div className="grid grid-cols-3 gap-3">
+              {/* Date — optional */}
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider mb-1" style={{ color: T.textMuted }}>
+                  Date <span style={{ opacity: 0.5, fontWeight: 400, fontSize: '10px', textTransform: 'none' }}>(opt)</span>
+                </label>
+                <input
+                  type="date"
+                  value={evt.date}
+                  onChange={(e) => updateEvent(evt.id, 'date', e.target.value)}
+                  style={{ ...inp(), colorScheme: darkMode ? 'dark' : 'light' }}
+                />
+              </div>
+              {/* Start time — optional */}
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider mb-1" style={{ color: T.textMuted }}>
+                  Start <span style={{ opacity: 0.5, fontWeight: 400, fontSize: '10px', textTransform: 'none' }}>(opt)</span>
+                </label>
+                <input
+                  type="time"
+                  value={evt.startTime}
+                  onChange={(e) => updateEvent(evt.id, 'startTime', e.target.value)}
+                  style={{ ...inp(), colorScheme: darkMode ? 'dark' : 'light' }}
+                />
+              </div>
+              {/* End time — optional */}
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider mb-1" style={{ color: T.textMuted }}>
+                  End <span style={{ opacity: 0.5, fontWeight: 400, fontSize: '10px', textTransform: 'none' }}>(opt)</span>
+                </label>
+                <input
+                  type="time"
+                  value={evt.endTime}
+                  onChange={(e) => updateEvent(evt.id, 'endTime', e.target.value)}
+                  style={{ ...inp(), colorScheme: darkMode ? 'dark' : 'light' }}
+                />
+              </div>
             </div>
           </div>
         ))}
       </div>
 
+      {/* Add event */}
       <button
         type="button"
         onClick={addEvent}
-        className="w-full flex items-center justify-center gap-2 py-3 rounded-xl
-                   text-sm font-medium transition-all duration-200
+        className="w-full mt-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200
                    hover:scale-[1.01] focus:outline-none"
         style={{
-          backgroundColor: T.surface,
-          border:          `1px dashed ${T.borderSubtle}`,
-          color:           T.textMuted,
+          background: 'transparent',
+          border: `1.5px dashed ${T.borderBrown}`,
+          color: T.accentText,
         }}
       >
-        <IconPlus /> Add event
+        + Add event
       </button>
+
+      {data.subEvents.length > 0 && (
+        <p className="mt-3 text-xs text-center" style={{ color: T.textMuted }}>
+          {data.subEvents.length} event{data.subEvents.length !== 1 ? 's' : ''} added
+        </p>
+      )}
     </div>
   )
 }
