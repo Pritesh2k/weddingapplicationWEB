@@ -12,8 +12,18 @@ export const SUGGESTED_EVENTS: Record<CultureModule, string[]> = {
 export const CURRENCIES = ['GBP', 'USD', 'EUR', 'AED', 'INR', 'CAD', 'AUD']
 
 export const PRIORITIES = [
-  'Guest Experience', 'Budget Control', 'Cultural Authenticity',
-  'Vendor Quality', 'Timeline Precision', 'Decor & Aesthetics',
+  'Guest Experience',
+  'Budget Control',
+  'Cultural Authenticity',
+  'Vendor Quality',
+  'Timeline Precision',
+  'Decor & Aesthetics',
+  'Intimate Atmosphere',
+  'Photography & Film',
+  'Food & Drink Quality',
+  'Sustainability',
+  'Family Involvement',
+  'Music & Entertainment',
 ]
 
 export const STEPS = [

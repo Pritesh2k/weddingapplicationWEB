@@ -66,7 +66,7 @@ export default function ProgrammePage() {
                 region: data.region ?? '',
                 currency: data.currency,
                 cultures: data.culture_modules ?? [],
-                priorities: [],
+                priorities: data.priorities ?? [],
                 guestEstimate: '',
                 budgetTarget: '',
                 hasPlanner: null,
@@ -173,7 +173,11 @@ export default function ProgrammePage() {
                             )}
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
                                 <div className="vow-section">
-                                    <PrioritiesCard priorities={programme.priorities} />
+                                    <PrioritiesCard
+                                        priorities={programme.priorities}
+                                        programmeId={programme.id}
+                                        onChange={(updated) => setProgramme(prev => prev ? { ...prev, priorities: updated } : prev)}
+                                    />
                                 </div>
                                 <div className="vow-section">
                                     <DetailsCard programme={programme} />
