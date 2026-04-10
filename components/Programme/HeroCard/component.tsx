@@ -4,6 +4,7 @@ import { supabase } from '@/DB/client'
 import { useState, useRef, useCallback } from 'react'
 import { BROWN_PRIMARY, BROWN_LIGHT } from '@/lib/theme'
 import { useTheme } from '@/context/ThemeContext'
+import { useAuth } from '@/context/Auth/AuthContext'
 import type { Programme } from '@/lib/Programme/types'
 import { FORMAT_LABELS } from '@/lib/Programme/types'
 import { daysUntil, fmtDate } from '@/lib/Programme/helpers'
@@ -213,6 +214,7 @@ function EditPill({
 
 export default function HeroCard({ programme: p, onChange }: Props) {
     const { darkMode, T } = useTheme()
+    const { user } = useAuth()
 
     const days = daysUntil(p.dateFrom)
     const weddingDate = p.dateFrom
@@ -223,27 +225,26 @@ export default function HeroCard({ programme: p, onChange }: Props) {
         const updated = { ...p, ...patch }
         onChange(updated)
 
-        // Build the Supabase column map
-        const updates: Record<string, unknown> = {}
-        if (patch.dateFrom !== undefined) updates.date_start = patch.dateFrom || null
-        if (patch.region !== undefined) updates.region = patch.region || null
-        if (patch.guestEstimate !== undefined) updates.guest_estimate = patch.guestEstimate || null
-        if (patch.budgetTarget !== undefined) updates.budget_target = patch.budgetTarget || null
+        if (!user) return
 
-        if (Object.keys(updates).length > 0) {
-            const { error } = await supabase
-                .from('wedding_programs')
-                .update(updates)
-                .eq('id', p.id)
-
-            if (error) console.error('[HeroCard] save failed:', error.message)
+        // Map Programme fields to RPC params
+        const rpcPatch: Record<string, unknown> = {
+            p_uid:          user.uid,
+            p_programme_id: p.id,
         }
-    }, [p, onChange])
+        if (patch.dateFrom      !== undefined) rpcPatch.p_date_start     = patch.dateFrom      || null
+        if (patch.region        !== undefined) rpcPatch.p_region          = patch.region        || null
+        if (patch.guestEstimate !== undefined) rpcPatch.p_guest_estimate  = patch.guestEstimate || null
+        if (patch.budgetTarget  !== undefined) rpcPatch.p_budget_target   = patch.budgetTarget  || null
 
-    const dateEdit = useInlineEdit(p.dateFrom, (v) => save({ dateFrom: v }))
-    const regionEdit = useInlineEdit(p.region, (v) => save({ region: v }))
+        const { error } = await supabase.rpc('update_wedding_programme', rpcPatch)
+        if (error) console.error('[HeroCard] save failed:', error.message)
+    }, [p, onChange, user])
+
+    const dateEdit   = useInlineEdit(p.dateFrom,      (v) => save({ dateFrom: v }))
+    const regionEdit = useInlineEdit(p.region,        (v) => save({ region: v }))
     const guestsEdit = useInlineEdit(p.guestEstimate, (v) => save({ guestEstimate: v }))
-    const budgetEdit = useInlineEdit(p.budgetTarget, (v) => save({ budgetTarget: v }))
+    const budgetEdit = useInlineEdit(p.budgetTarget,  (v) => save({ budgetTarget: v }))
 
     return (
         <div
@@ -254,8 +255,8 @@ export default function HeroCard({ programme: p, onChange }: Props) {
                 boxShadow: darkMode
                     ? '0 24px 60px rgba(0,0,0,0.40)'
                     : '0 8px 40px rgba(139,107,71,0.10)',
-                height: '100%',      // ← fills the grid cell
-                minHeight: 'unset',  // ← remove the clamp, grid handles sizing
+                height: '100%',
+                minHeight: 'unset',
             }}
         >
             {/* Top gradient accent */}
@@ -266,7 +267,7 @@ export default function HeroCard({ programme: p, onChange }: Props) {
                 }}
             />
 
-            {/* ── Info block ───────────────────────────────────── */}
+            {/* ── Info block ─────────────────────────────────────────────── */}
             <div className="px-6 sm:px-8 pt-6 sm:pt-7 pb-5">
 
                 <p
@@ -354,7 +355,7 @@ export default function HeroCard({ programme: p, onChange }: Props) {
             {/* Divider */}
             <div className="mx-6 sm:mx-8 h-px shrink-0" style={{ backgroundColor: T.borderSubtle }} />
 
-            {/* ── Countdown — flex-1 so it fills remaining space ── */}
+            {/* ── Countdown ────────────────────────────────────────────── */}
             <div className="flex-1 flex flex-col items-center justify-center px-6 py-8">
 
                 {days !== null && days > 0 && (
@@ -425,7 +426,7 @@ export default function HeroCard({ programme: p, onChange }: Props) {
                 )}
             </div>
 
-            {/* ── Stats strip ──────────────────────────────────── */}
+            {/* ── Stats strip ────────────────────────────────────────────── */}
             <div
                 className="grid grid-cols-3 shrink-0"
                 style={{ borderTop: `1px solid ${T.borderSubtle}` }}
