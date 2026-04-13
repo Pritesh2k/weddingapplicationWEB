@@ -172,7 +172,11 @@ export default function ProgrammePage() {
                             <div className="vow-section"><PlanningModules /></div>
                             {programme.subEvents.length > 0 && (
                                 <div className="vow-section">
-                                    <Timeline subEvents={programme.subEvents} />
+                                    <Timeline
+                                        subEvents={programme.subEvents}
+                                        programmeId={programme.id}
+                                        onChange={(updated) => setProgramme(prev => prev ? { ...prev, subEvents: updated } : prev)}
+                                    />
                                 </div>
                             )}
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
@@ -184,7 +188,7 @@ export default function ProgrammePage() {
                                     />
                                 </div>
                                 <div className="vow-section">
-                                    <DetailsCard programme={programme} />
+                                    <DetailsCard programme={programme} onChange={(updated) => setProgramme(prev => prev ? { ...prev, ...updated } : prev)} />
                                 </div>
                             </div>
                         </div>

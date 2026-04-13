@@ -6,7 +6,11 @@ import type { Programme } from '@/lib/Programme/types'
 import { FORMAT_LABELS } from '@/lib/Programme/types'
 import { fmtDate } from '@/lib/Programme/helpers'
 
-interface Props { programme: Programme }
+// Add these props to DetailsCard
+interface Props {
+  programme: Programme
+  onChange: (updated: Programme) => void  // ADD THIS
+}
 
 export default function DetailsCard({ programme: p }: Props) {
   const { T } = useTheme()
