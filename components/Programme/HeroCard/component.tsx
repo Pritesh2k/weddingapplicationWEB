@@ -221,44 +221,44 @@ export default function HeroCard({ programme: p, onChange }: Props) {
         ? fmtDate(p.dateFrom, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
         : null
 
-    // ── date + region → update_wedding_programme ─────────────────────
+    // ── date + region → update_wedding_programme ──────────────────
     const saveLocation = useCallback(async (patch: Partial<Pick<Programme, 'dateFrom' | 'region'>>) => {
         const updated = { ...p, ...patch }
         onChange(updated)
         if (!user) return
 
-        const rpcPatch: Record<string, unknown> = {
+        const { error } = await supabase.rpc('update_wedding_programme', {
             p_uid:          user.uid,
             p_programme_id: p.id,
-        }
-        if (patch.dateFrom !== undefined) rpcPatch.p_date_start = patch.dateFrom || null
-        if (patch.region   !== undefined) rpcPatch.p_region     = patch.region   || null
-
-        const { error } = await supabase.rpc('update_wedding_programme', rpcPatch)
+            ...(patch.dateFrom !== undefined && { p_date_start: patch.dateFrom || null }),
+            ...(patch.region   !== undefined && { p_region:     patch.region   || null }),
+        })
         if (error) console.error('[HeroCard] location save failed:', error.message)
     }, [p, onChange, user])
 
-    // ── guests + budget → update_programme_stats ─────────────────────
+    // ── guests + budget → update_programme_stats ──────────────────
     const saveStats = useCallback(async (patch: Partial<Pick<Programme, 'guestEstimate' | 'budgetTarget'>>) => {
         const updated = { ...p, ...patch }
         onChange(updated)
         if (!user) return
 
-        const rpcPatch: Record<string, unknown> = {
+        const { error } = await supabase.rpc('update_programme_stats', {
             p_uid:          user.uid,
             p_programme_id: p.id,
-        }
-        if (patch.guestEstimate !== undefined) rpcPatch.p_guest_estimate = patch.guestEstimate ? Number(patch.guestEstimate) : null
-        if (patch.budgetTarget  !== undefined) rpcPatch.p_budget_target  = patch.budgetTarget  ? Number(patch.budgetTarget)  : null
-
-        const { error } = await supabase.rpc('update_programme_stats', rpcPatch)
+            ...(patch.guestEstimate !== undefined && {
+                p_guest_estimate: patch.guestEstimate ? Number(patch.guestEstimate) : null,
+            }),
+            ...(patch.budgetTarget !== undefined && {
+                p_budget_target: patch.budgetTarget ? Number(patch.budgetTarget) : null,
+            }),
+        })
         if (error) console.error('[HeroCard] stats save failed:', error.message)
     }, [p, onChange, user])
 
-    const dateEdit   = useInlineEdit(p.dateFrom,      (v) => saveLocation({ dateFrom: v }))
-    const regionEdit = useInlineEdit(p.region,        (v) => saveLocation({ region: v }))
-    const guestsEdit = useInlineEdit(String(p.guestEstimate ?? ''), (v) => saveStats({ guestEstimate: v }))
-    const budgetEdit = useInlineEdit(String(p.budgetTarget  ?? ''), (v) => saveStats({ budgetTarget: v }))
+    const dateEdit   = useInlineEdit(p.dateFrom,                          (v) => saveLocation({ dateFrom: v }))
+    const regionEdit = useInlineEdit(p.region,                            (v) => saveLocation({ region: v }))
+    const guestsEdit = useInlineEdit(String(p.guestEstimate ?? ''),       (v) => saveStats({ guestEstimate: v }))
+    const budgetEdit = useInlineEdit(String(p.budgetTarget  ?? ''),       (v) => saveStats({ budgetTarget: v }))
 
     return (
         <div
@@ -281,9 +281,8 @@ export default function HeroCard({ programme: p, onChange }: Props) {
                 }}
             />
 
-            {/* ── Info block ─────────────────────────────────────────────── */}
+            {/* ── Info block ─────────────────────────────────────────── */}
             <div className="px-6 sm:px-8 pt-6 sm:pt-7 pb-5">
-
                 <p
                     className="text-[10px] font-bold tracking-[0.18em] uppercase mb-4"
                     style={{ color: T.accentText }}
@@ -293,10 +292,7 @@ export default function HeroCard({ programme: p, onChange }: Props) {
 
                 <h1
                     className="font-bold tracking-tight leading-tight mb-1"
-                    style={{
-                        color: T.textPrimary,
-                        fontSize: 'clamp(22px, 3vw, 30px)',
-                    }}
+                    style={{ color: T.textPrimary, fontSize: 'clamp(22px, 3vw, 30px)' }}
                 >
                     {p.title}
                 </h1>
@@ -304,7 +300,7 @@ export default function HeroCard({ programme: p, onChange }: Props) {
                     {p.coupleNameA} & {p.coupleNameB}
                 </p>
 
-                {/* Pills */}
+                {/* Pills — date & location */}
                 <div className="flex flex-wrap gap-1.5 mb-3">
                     <EditPill
                         icon={<IconCalendar />}
@@ -369,9 +365,8 @@ export default function HeroCard({ programme: p, onChange }: Props) {
             {/* Divider */}
             <div className="mx-6 sm:mx-8 h-px shrink-0" style={{ backgroundColor: T.borderSubtle }} />
 
-            {/* ── Countdown ────────────────────────────────────────────── */}
+            {/* ── Countdown ─────────────────────────────────────────── */}
             <div className="flex-1 flex flex-col items-center justify-center px-6 py-8">
-
                 {days !== null && days > 0 && (
                     <>
                         <p
@@ -393,46 +388,33 @@ export default function HeroCard({ programme: p, onChange }: Props) {
                         <div
                             className="mt-4 rounded-full"
                             style={{
-                                width: '48px',
-                                height: '1px',
+                                width: '48px', height: '1px',
                                 background: `linear-gradient(90deg, transparent, ${BROWN_PRIMARY}, transparent)`,
                             }}
                         />
-                        <p
-                            className="mt-4 text-xs tracking-wide text-center"
-                            style={{ color: T.textMuted }}
-                        >
+                        <p className="mt-4 text-xs tracking-wide text-center" style={{ color: T.textMuted }}>
                             {weddingDate}
                         </p>
                     </>
                 )}
-
                 {days === 0 && (
                     <>
-                        <p className="text-[11px] font-bold tracking-[0.2em] uppercase mb-4"
-                            style={{ color: T.textMuted }}>
+                        <p className="text-[11px] font-bold tracking-[0.2em] uppercase mb-4" style={{ color: T.textMuted }}>
                             It's your wedding day
                         </p>
                         <p className="text-5xl">🎉</p>
-                        <p className="mt-4 text-sm font-semibold tracking-wide" style={{ color: '#7ABDB0' }}>
-                            Today!
-                        </p>
+                        <p className="mt-4 text-sm font-semibold tracking-wide" style={{ color: '#7ABDB0' }}>Today!</p>
                     </>
                 )}
-
                 {days !== null && days < 0 && (
                     <>
-                        <p className="text-[11px] font-bold tracking-[0.2em] uppercase mb-4"
-                            style={{ color: T.textMuted }}>
+                        <p className="text-[11px] font-bold tracking-[0.2em] uppercase mb-4" style={{ color: T.textMuted }}>
                             Wedding completed
                         </p>
                         <p className="text-4xl font-bold" style={{ color: '#7ABDB0' }}>✓</p>
-                        <p className="mt-4 text-xs tracking-wide" style={{ color: T.textMuted }}>
-                            {weddingDate}
-                        </p>
+                        <p className="mt-4 text-xs tracking-wide" style={{ color: T.textMuted }}>{weddingDate}</p>
                     </>
                 )}
-
                 {days === null && (
                     <p className="text-xs text-center" style={{ color: T.textMuted }}>
                         Set a wedding date to see your countdown
@@ -440,11 +422,12 @@ export default function HeroCard({ programme: p, onChange }: Props) {
                 )}
             </div>
 
-            {/* ── Stats strip ────────────────────────────────────────────── */}
+            {/* ── Stats strip ───────────────────────────────────────── */}
             <div
                 className="grid grid-cols-3 shrink-0"
                 style={{ borderTop: `1px solid ${T.borderSubtle}` }}
             >
+                {/* Events count — read-only */}
                 <div
                     className="flex flex-col items-center py-4 sm:py-5"
                     style={{ borderRight: `1px solid ${T.borderSubtle}` }}
@@ -455,6 +438,7 @@ export default function HeroCard({ programme: p, onChange }: Props) {
                     <p className="text-[10px]" style={{ color: T.textMuted }}>Events</p>
                 </div>
 
+                {/* Guests — editable → update_programme_stats */}
                 <StatCell
                     label="Guests"
                     display={p.guestEstimate ? String(p.guestEstimate) : '—'}
@@ -470,6 +454,7 @@ export default function HeroCard({ programme: p, onChange }: Props) {
                     divider
                 />
 
+                {/* Budget — editable → update_programme_stats */}
                 <StatCell
                     label="Budget"
                     display={
