@@ -44,9 +44,9 @@ begin
     'region',             v_prog.region,
     'currency',           v_prog.currency,
     'culture_modules',    v_prog.culture_modules,
-    'priorities',         '[]'::json,
-    'guest_estimate',     null,
-    'budget_target',      null,
+    'priorities',         coalesce(v_prog.priorities, '{}'),
+    'guest_estimate',     v_prog.guest_estimate,
+    'budget_target',      v_prog.budget_target,
     'has_planner',        (v_prog.planning_mode = 'planner_assisted'),
     'created_at',         v_prog.created_at,
     'events',             coalesce(v_events, '[]'::json)

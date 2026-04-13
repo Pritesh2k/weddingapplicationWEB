@@ -221,30 +221,44 @@ export default function HeroCard({ programme: p, onChange }: Props) {
         ? fmtDate(p.dateFrom, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
         : null
 
-    const save = useCallback(async (patch: Partial<Programme>) => {
+    // ── date + region → update_wedding_programme ─────────────────────
+    const saveLocation = useCallback(async (patch: Partial<Pick<Programme, 'dateFrom' | 'region'>>) => {
         const updated = { ...p, ...patch }
         onChange(updated)
-
         if (!user) return
 
-        // Map Programme fields to RPC params
         const rpcPatch: Record<string, unknown> = {
             p_uid:          user.uid,
             p_programme_id: p.id,
         }
-        if (patch.dateFrom      !== undefined) rpcPatch.p_date_start     = patch.dateFrom      || null
-        if (patch.region        !== undefined) rpcPatch.p_region          = patch.region        || null
-        if (patch.guestEstimate !== undefined) rpcPatch.p_guest_estimate  = patch.guestEstimate || null
-        if (patch.budgetTarget  !== undefined) rpcPatch.p_budget_target   = patch.budgetTarget  || null
+        if (patch.dateFrom !== undefined) rpcPatch.p_date_start = patch.dateFrom || null
+        if (patch.region   !== undefined) rpcPatch.p_region     = patch.region   || null
 
         const { error } = await supabase.rpc('update_wedding_programme', rpcPatch)
-        if (error) console.error('[HeroCard] save failed:', error.message)
+        if (error) console.error('[HeroCard] location save failed:', error.message)
     }, [p, onChange, user])
 
-    const dateEdit   = useInlineEdit(p.dateFrom,      (v) => save({ dateFrom: v }))
-    const regionEdit = useInlineEdit(p.region,        (v) => save({ region: v }))
-    const guestsEdit = useInlineEdit(p.guestEstimate, (v) => save({ guestEstimate: v }))
-    const budgetEdit = useInlineEdit(p.budgetTarget,  (v) => save({ budgetTarget: v }))
+    // ── guests + budget → update_programme_stats ─────────────────────
+    const saveStats = useCallback(async (patch: Partial<Pick<Programme, 'guestEstimate' | 'budgetTarget'>>) => {
+        const updated = { ...p, ...patch }
+        onChange(updated)
+        if (!user) return
+
+        const rpcPatch: Record<string, unknown> = {
+            p_uid:          user.uid,
+            p_programme_id: p.id,
+        }
+        if (patch.guestEstimate !== undefined) rpcPatch.p_guest_estimate = patch.guestEstimate ? Number(patch.guestEstimate) : null
+        if (patch.budgetTarget  !== undefined) rpcPatch.p_budget_target  = patch.budgetTarget  ? Number(patch.budgetTarget)  : null
+
+        const { error } = await supabase.rpc('update_programme_stats', rpcPatch)
+        if (error) console.error('[HeroCard] stats save failed:', error.message)
+    }, [p, onChange, user])
+
+    const dateEdit   = useInlineEdit(p.dateFrom,      (v) => saveLocation({ dateFrom: v }))
+    const regionEdit = useInlineEdit(p.region,        (v) => saveLocation({ region: v }))
+    const guestsEdit = useInlineEdit(String(p.guestEstimate ?? ''), (v) => saveStats({ guestEstimate: v }))
+    const budgetEdit = useInlineEdit(String(p.budgetTarget  ?? ''), (v) => saveStats({ budgetTarget: v }))
 
     return (
         <div
@@ -443,7 +457,7 @@ export default function HeroCard({ programme: p, onChange }: Props) {
 
                 <StatCell
                     label="Guests"
-                    display={p.guestEstimate || '—'}
+                    display={p.guestEstimate ? String(p.guestEstimate) : '—'}
                     editing={guestsEdit.editing}
                     value={guestsEdit.value}
                     inputRef={guestsEdit.inputRef}
